@@ -9,13 +9,13 @@ from pdfrw.pdfwriter import PdfWriter, IndirectPdfDict, PdfName, \
 
 class ImageThumbnail(object):
     size = (128,128)
-    maxMemoryFileSize = 1024*1024*2 #2mb
-    maxFileSize = 1024*1024*15      #Max file size to be processed, since the image data needs to be loaded completely in memory.
+    max_memory_size = 1024*1024*2 #2mb
+    max_file_size = 1024*1024*15      #Max file size to be processed, since the image data needs to be loaded completely in memory.
     format = "PNG"                  #Leave None to use original format
     quality = Image.ANTIALIAS    
 
     @classmethod
-    def checkFile(self, data):
+    def check_file(self, data):
         '''
         Checks file constraints in order to be used as thumbnail and by the PIL library.
         '''
@@ -26,9 +26,9 @@ class ImageThumbnail(object):
             size = data.size
         else:            
 
-            canSeek = hasattr(data, 'tell') and hasattr(data, 'seek')
+            can_seek = hasattr(data, 'tell') and hasattr(data, 'seek')
 
-            if not canSeek:
+            if not can_seek:
                 raise ValueError("File object must be seekable.")
 
             data.seek(0, os.SEEK_END)
@@ -36,7 +36,7 @@ class ImageThumbnail(object):
             data.seek(0)
             
 
-        if size > self.maxFileSize:
+        if size > self.max_file_size:
             raise ValueError("File is too big.")
     
         
@@ -55,22 +55,22 @@ class ImageThumbnail(object):
         
         '''
 
-        cls.checkFile(data)
+        cls.check_file(data)
 
         try:        
             img = Image.open(data)
         except Exception as e:
             raise ValueError("Invalid image file.")
     
-        res = SpooledTemporaryFile(max_size=cls.maxMemoryFileSize, mode='w+b',prefix='thmbtemp')
+        res = SpooledTemporaryFile(max_size=cls.max_memory_size, mode='w+b',prefix='thmbtemp')
 
-        imgFormat = (cls.format or img.format)
+        img_format = (cls.format or img.format)
 
         img.thumbnail(cls.size, cls.quality)
-        img.save(res, format = imgFormat)
+        img.save(res, format = img_format)
         res.seek(0)
 
-        return res, imgFormat
+        return res, img_format
     
 
 
@@ -79,7 +79,7 @@ class ZipFile2(ZipFile):
     Wrapper class around zip file to allow writing from a stream without reading everything into memory
     '''
     
-    def writeStream(self, arcname, stream, compress_type=None):
+    def write_stream(self, arcname, stream, compress_type=None):
         '''
         Wriets to the zip file from a stream in an efficient way
         stream must be seekable (or contain a size property) and only files (not dirs) can be used
@@ -177,19 +177,19 @@ class NewPdfWriter(PdfWriter):
     _outline = None
     _info = None
         
-    def addBookmark(self, title, pageNum, parent = None):
+    def add_bookmark(self, title, page_num, parent = None):
         '''
         Adds a new bookmark entry.
-        pageNum must be a valid page number in the writer
+        page_num must be a valid page number in the writer
         and parent can be a bookmark object returned by
-        a previous addBookmark call
+        a previous add_bookmark call
         '''
         
         try:
-            page = self.pagearray[pageNum]
+            page = self.pagearray[page_num]
         except IndexError:
             # TODO: Improve error handling ?
-            PdfOutputError("Invalid page number: " % (pageNum))
+            PdfOutputError("Invalid page number: " % (page_num))
 
         parent = parent or self._outline
         if parent is None:
@@ -217,7 +217,7 @@ class NewPdfWriter(PdfWriter):
 
         return bookmark
         
-    def setInfo(self, info):
+    def set_info(self, info):
         '''
         Sets pdf metadata, info must be a dict where each key is the metadata key
         standard/known keys are:

@@ -10,7 +10,7 @@ from rest_framework import status
 '''
 
 
-def fullClean(ele, validate_unique = True):
+def full_clean(ele, validate_unique = True):
     '''
         Calls the full_clean method of a model but wraping any django exception into rest api exception.
         Other model validation and exception conversion can be added here.
@@ -21,9 +21,9 @@ def fullClean(ele, validate_unique = True):
         raise ValidationError(detail=e.message_dict)
 
 
-def validateUnique(ele):
+def validate_unique(ele):
     '''
-        Similar to fullClean, but only validate unique constraints
+        Similar to full_clean, but only validate unique constraints
     '''
 
     try:
@@ -67,14 +67,14 @@ class OperationError(APIException):
     default_detail = "Operation Error"
     code = ExceptionCodes.operationError
 
-    def __init__(self, detail = None, code = None, statusCode = None):
+    def __init__(self, detail = None, code = None, status_code = None):
         self.detail = _force_text_recursive(detail) if detail else None
         
         #Add message to base exception
         self.message = self.detail
 
-        if statusCode:
-            self.status_code = statusCode
+        if status_code:
+            self.status_code = status_code
 
         if code:
             self.code = code

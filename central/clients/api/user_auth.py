@@ -6,12 +6,12 @@ from rest_framework.reverse import reverse
 from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
 from rest_framework.settings import api_settings
 from rest_framework.throttling import SimpleRateThrottle
-from clients.serializers.userAuth import (AuthenticateCredentialsSerializer, AuthenticateTokenSerializer, PasswordChangeSerializer, 
+from clients.serializers.user_auth import (AuthenticateCredentialsSerializer, AuthenticateTokenSerializer, PasswordChangeSerializer, 
                                           RequestPasswordRecoverySerializer, TokenPasswordChangeSerializer)
 
-from clients.auth import userAuth
+from clients.auth import user_auth
 from logic.exceptions import APIException, AuthenticationFailed, PermissionDenied, ExceptionCodes
-from logic.auth import authenticateUser, createUserJWT, validateUserJWT, getUserPasswordValidatorMessages
+from logic.auth import authenticate_user, create_user_JWT, validate_user_JWT, get_user_password_validator_messages
 
 #about docstrings yaml: http://django-rest-swagger.readthedocs.org/en/latest/yaml.html#parameters
 
@@ -53,13 +53,13 @@ class UserAuth(viewsets.ViewSet):
         _____________________________________________________________<br/>
     '''
   
-    def _getUserData(self, user, token):
+    def _get_user_data(self, user, token):
 
         return {
                 'id':user.pk,     
                 'email':user.email,
-                'firstName':user.firstName,
-                'lastName':user.lastName,
+                'first_name':user.first_name,
+                'last_name':user.last_name,
                 'token':token
             }
         
@@ -85,7 +85,7 @@ class UserAuth(viewsets.ViewSet):
         data = AuthenticateCredentialsSerializer(data=request.data)
         data.is_valid(True) 
         
-        user = authenticateUser(
+        user = authenticate_user(
             data.validated_data['email'],
             data.validated_data['password'],
             True,
@@ -93,9 +93,9 @@ class UserAuth(viewsets.ViewSet):
             PermissionDenied
         )
 
-        token = createUserJWT(user)
+        token = create_user_JWT(user)
                 
-        return Response(self._getUserData(user, token))
+        return Response(self._get_user_data(user, token))
 
 
     @list_route(methods=['post'])
@@ -118,13 +118,13 @@ class UserAuth(viewsets.ViewSet):
         data = AuthenticateTokenSerializer(data=request.data)
         data.is_valid(True)   
         
-        user, tokenData = validateUserJWT(data.validated_data['token'], True, PermissionDenied)
+        user, token_data = validate_user_JWT(data.validated_data['token'], True, PermissionDenied)
                                
-        return Response(self._getUserData(user, data.validated_data['token']) )
+        return Response(self._get_user_data(user, data.validated_data['token']) )
 
 
     #This one requires an already authenticated user.
-    @list_route(methods=['post'], authentication_classes=(userAuth.JWTUserAuthenticator,), permission_classes = (IsAuthenticated,), throttle_classes = (AuthThrottle,))
+    @list_route(methods=['post'], authentication_classes=(user_auth.JWTUserAuthenticator,), permission_classes = (IsAuthenticated,), throttle_classes = (AuthThrottle,))
     def changepassword(self, request): 
         '''
             Changes current authenticated user password. Returns an updated token to prevent session expiration.
@@ -144,7 +144,7 @@ class UserAuth(viewsets.ViewSet):
         data.is_valid(True)   
                
         user = data.save()
-        token = createUserJWT(user)
+        token = create_user_JWT(user)
                 
         return Response(token)
 
@@ -155,7 +155,7 @@ class UserAuth(viewsets.ViewSet):
             Returns a list of password requirements.
         '''
 
-        return Response(getUserPasswordValidatorMessages())
+        return Response(get_user_password_validator_messages())
 
 
     @list_route(methods=['post'], throttle_classes = (NonAuthThrottle,))

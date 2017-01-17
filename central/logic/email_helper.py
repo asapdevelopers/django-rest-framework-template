@@ -13,13 +13,13 @@ from logic.exceptions import ExceptionCodes, OperationError
 from django.core.mail import EmailMultiAlternatives
 from urllib import quote, quote_plus
 from django.core.mail import get_connection
-from logic.threadPool import ThreadPool
+from logic.thread_pool import ThreadPool
 import logging
 import traceback
 
 
 
-emailSendingLogger = logging.getLogger('email.sending')
+email_sending_logger = logging.getLogger('email.sending')
 
 EMAIL_REPLACE_REGEX = re.compile(ur'\r|\n')
 POOL = ThreadPool(workers=1)
@@ -28,7 +28,7 @@ DEFAULT_FROM_EMAIL = settings.DEFAULT_FROM_EMAIL
 
 
 
-def _decodeString(value, charset = None):
+def _decode_string(value, charset = None):
     '''
         Given a value string and a charset, decodes it returning an unicode string.
         Uses utf-8 if no charset provided.
@@ -38,7 +38,7 @@ def _decodeString(value, charset = None):
     return value.decode(charset or "UTF-8", 'ignore') if isinstance(value, str) else value
 
 
-def _decodeHeader(msg, key, defaultVal):
+def _decode_header(msg, key, default_val):
     '''
         Given a msg and key, tries to decode its header.
         Returns an unicode string converted based on the header charset, or utf-8 if no charset.
@@ -46,14 +46,14 @@ def _decodeHeader(msg, key, defaultVal):
     
     if msg and key in msg:
         decoded = decode_header(msg[key])[0]
-        return _decodeString(decoded[0], decoded[1])        
+        return _decode_string(decoded[0], decoded[1])        
     else:
-        return defaultVal
+        return default_val
 
 
 class Attachment(object):
     
-    def __init__(self, name, extension, mimeType, data):
+    def __init__(self, name, extension, mime_type, data):
         '''
             Data must be a file like object
         '''
@@ -63,11 +63,11 @@ class Attachment(object):
 
         self.name = name
         self.extension = extension
-        self.mimeType = mimeType
+        self.mime_type = mime_type
         self.data = data
 
 
-def _sendEmail(email, silent=True):
+def _send_email(email, silent=True):
     '''
         Helper to call the email send object and fail silently if required.
     '''
@@ -76,15 +76,15 @@ def _sendEmail(email, silent=True):
     try:        
         email.send()        
     except Exception as e:
-        emailSendingLogger.error("Failed to send email: " + unicode(e), extra={'extra': traceback.format_exc()})
+        email_sending_logger.error("Failed to send email: " + unicode(e), extra={'extra': traceback.format_exc()})
 
         if not silent:
             raise OperationError("Failed to send email.", ExceptionCodes.emailSendingError)
 
 
-def sendEmail(subject, to = None, cc = None, bcc = None,
-              plainText = None, htmlText = None, attachments = None, 
-              fromEmail = None, fromAccount = None, fromPassword = None, headers = None, async=True):
+def send_email(subject, to = None, cc = None, bcc = None,
+              plain_text = None, html_text = None, attachments = None, 
+              from_email = None, from_account = None, from_password = None, headers = None, async=True):
 
     '''
         Sends an email. Server and backend used is the one defined on settings: EMAIL_HOST, EMAIL_PORT, EMAIL_USE_TLS
@@ -94,13 +94,13 @@ def sendEmail(subject, to = None, cc = None, bcc = None,
 
         to, cc, bcc: list of string emails
 
-        plainText: email body in plain text, required.
+        plain_text: email body in plain text, required.
 
-        htmlText: email body in html, optional
+        html_text: email body in html, optional
 
         attachments: list of Attachment objects, extension wont be used. Attachment name will be escaped
 
-        fromEmail, fromAccount, fromPassword: If not present, will be used defaults from settings, this is:
+        from_email, from_account, from_password: If not present, will be used defaults from settings, this is:
             DEFAULT_FROM_EMAIL, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
 
         additional headers can be set, which are SMTP headers.
@@ -111,14 +111,14 @@ def sendEmail(subject, to = None, cc = None, bcc = None,
 
     '''
 
-    if plainText is None:
+    if plain_text is None:
         raise ValueError("No email text provided.")
     
 
     email = EmailMultiAlternatives(
         re.sub(EMAIL_REPLACE_REGEX,'', subject),
-        plainText,
-        from_email = fromEmail or DEFAULT_FROM_EMAIL,
+        plain_text,
+        from_email = from_email or DEFAULT_FROM_EMAIL,
         to = to,
         cc = cc,
         bcc = bcc,
@@ -126,20 +126,20 @@ def sendEmail(subject, to = None, cc = None, bcc = None,
     )
 
     #if we have html body
-    if htmlText is not None:
-        email.attach_alternative(htmlText, "text/html")
+    if html_text is not None:
+        email.attach_alternative(html_text, "text/html")
 
     #If we have a different from account/password, use a different connection.
-    if fromAccount and fromPassword:        
-        email.connection = get_connection(username=fromAccount, password=fromPassword)
+    if from_account and from_password:        
+        email.connection = get_connection(username=from_account, password=from_password)
         
 
     if attachments:
         for a in attachments:            
-            email.attach(quote_plus(a.name.encode("UTF-8","ignore")), a.data.read(), a.mimeType)  
+            email.attach(quote_plus(a.name.encode("UTF-8","ignore")), a.data.read(), a.mime_type)  
 
     if async:
-        POOL.apply_async(_sendEmail, (email, True))
+        POOL.apply_async(_send_email, (email, True))
     else:
-        _sendEmail(email, False)
+        _send_email(email, False)
         

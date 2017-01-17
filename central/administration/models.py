@@ -6,7 +6,7 @@ from django.contrib.auth.models import  BaseUserManager, AbstractBaseUser
 #Define any field you want.
 class AdministratorManager(BaseUserManager):
 
-    def _createUser(self, email, password=None, isAdmin = False, **extraArgs):
+    def _create_user(self, email, password=None, is_admin = False, **extra_args):
         if not email:
             msg = 'Administrators must have an email address.'
             raise ValueError(msg)
@@ -16,18 +16,18 @@ class AdministratorManager(BaseUserManager):
             raise ValueError(msg)
                
 
-        user = self.model(email=AdministratorManager.normalize_email(email), is_admin = isAdmin, **extraArgs)
+        user = self.model(email=AdministratorManager.normalize_email(email), is_admin = is_admin, **extra_args)
 
         #Set password with this method which handles hashing
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_user(self, email, password=None, **extraArgs):
-        self._createUser(email, password, False, **extraArgs)
+    def create_user(self, email, password=None, **extra_args):
+        self._create_user(email, password, False, **extra_args)
 
-    def create_superuser(self, email, password=None, **extraArgs):
-        self._createUser(email, password, True, **extraArgs)
+    def create_superuser(self, email, password=None, **extra_args):
+        self._create_user(email, password, True, **extra_args)
         
 
 #In order for User to work with django password recovery, it needs to have 'email' and 'is_active' fields exactly as that.
@@ -36,8 +36,8 @@ class Administrator(AbstractBaseUser):
     
     USERNAME_FIELD = 'email'
     
-    firstName = models.CharField(max_length=250,default="", blank=True)
-    lastName = models.CharField(max_length=250,default="", blank=True)
+    first_name = models.CharField(max_length=250,default="", blank=True)
+    last_name = models.CharField(max_length=250,default="", blank=True)
 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)   #Superuser
@@ -50,7 +50,7 @@ class Administrator(AbstractBaseUser):
         
     
     def get_full_name(self):
-        return self.firstName + " " + self.lastName
+        return self.first_name + " " + self.last_name
     
     def get_short_name(self):
         return self.email

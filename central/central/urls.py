@@ -6,20 +6,20 @@ from django.conf import settings
 
 urlpatterns = []
 
-from clients import urls as clientsUrls
-urlpatterns.append(url(r'^api/', include(clientsUrls.urlpatterns)))
+from clients import urls as clients_urls
+urlpatterns.append(url(r'^api/', include(clients_urls.urlpatterns)))
 
-from administration import urls as administrationUrls
+from administration import urls as administration_urls
 admin.autodiscover()
-urlpatterns.append(url(r'^', include(administrationUrls.urlpatterns))) #Make sure to always have a root url so aws doesn't complain with its internal tests to '/'
+urlpatterns.append(url(r'^', include(administration_urls.urlpatterns))) #Make sure to always have a root url so aws doesn't complain with its internal tests to '/'
     
 
 
 
 # Add robots.txt url
 
-robotsRes ="User-agent: *\r\nDisallow: /"
+robots_res ="User-agent: *\r\nDisallow: /"
 def robotstxt(request):
-    return HttpResponse(robotsRes)
+    return HttpResponse(robots_res)
 
 urlpatterns.append(url(r'^robots\.txt$', robotstxt))

@@ -35,10 +35,10 @@ PASSWORD_RECOVERY_TOKEN_EXPIRATION = timedelta(minutes=PASSWORD_RECOVERY_TOKEN_E
 AUTH_MESSAGES = {
 
     #General messages
-    'userLocked':'User Locked.',
-    'invalidCredentials':"Invalid credentials.",
-    'invalidUserToken':"Invalid user token.",
-    'invalidPasswordRecoveryToken':"Password recovery token is invalid."
+    'user_locked':'User Locked.',
+    'invalid_credentials':"Invalid credentials.",
+    'invalid_user_token':"Invalid user token.",
+    'invalid_password_recovery_token':"Password recovery token is invalid."
         
 }
 
@@ -58,39 +58,39 @@ u"""<html><body>
 </body></html>
 """
 
-def validateUserAuthStatus(user, exClass = AuthenticationFailed):
+def validate_user_auth_status(user, ex_class = AuthenticationFailed):
     '''
         Performs additional user validation such as active and requiresPasswordChange
     '''
     if not user.is_active:
-        raise exClass(AUTH_MESSAGES['userLocked'])    
+        raise ex_class(AUTH_MESSAGES['user_locked'])    
 
-def authenticateUser(email, password, validateAdditional = True, updateLastLogin = False, exClass = AuthenticationFailed):
+def authenticate_user(email, password, validate_additional = True, update_last_login = False, ex_class = AuthenticationFailed):
     '''
-        Authenticates and returns an user instance or raises exClass if authentication fails.
-        if validateAdditional is True, will perform additional user auth validation.
+        Authenticates and returns an user instance or raises ex_class if authentication fails.
+        if validate_additional is True, will perform additional user auth validation.
         We use a variable exception class as different calls might require different authentication exceptions.
     '''
 
     try:
         user = User.objects.get(email=email)
     except User.DoesNotExist:
-        raise exClass(AUTH_MESSAGES['invalidCredentials'])
+        raise ex_class(AUTH_MESSAGES['invalid_credentials'])
 
     if not user.check_password(password):
-        raise exClass(AUTH_MESSAGES['invalidCredentials'])
+        raise ex_class(AUTH_MESSAGES['invalid_credentials'])
 
-    if validateAdditional:
-        validateUserAuthStatus(user, exClass)
+    if validate_additional:
+        validate_user_auth_status(user, ex_class)
 
-    if updateLastLogin:
+    if update_last_login:
         user.last_login = timezone.now()
         user.save(update_fields=['last_login'])
 
     return user
 
 
-def createUserJWT(user, exp=TOKEN_EXPIRATION_MINS):
+def create_user_JWT(user, exp=TOKEN_EXPIRATION_MINS):
     '''
         Creates a user JWT with the following, with exp being a time in minutes
 
@@ -106,7 +106,7 @@ def createUserJWT(user, exp=TOKEN_EXPIRATION_MINS):
     payload = {
             'id':user.pk,
             'exp':datetime.utcnow() + timedelta(minutes=exp), #utc date + exp, jwt handles unix time translation.
-            'l':user.lastPasswordChange.isoformat() if user.lastPasswordChange else ""
+            'l':user.last_password_change.isoformat() if user.last_password_change else ""
         }
 
     
@@ -114,39 +114,39 @@ def createUserJWT(user, exp=TOKEN_EXPIRATION_MINS):
    
 
 
-def validateUserJWT(token, validateAdditional = True, exClass = AuthenticationFailed):
+def validate_user_JWT(token, validate_additional = True, ex_class = AuthenticationFailed):
     '''
-        Returns a (user, tokenData) instance only if the token is valid, has valid data and is not expired
-        otherwise raises exClass.
+        Returns a (user, token_data) instance only if the token is valid, has valid data and is not expired
+        otherwise raises ex_class.
     '''
     
     if not token:
-        raise exClass(AUTH_MESSAGES['invalidUserToken'])
+        raise ex_class(AUTH_MESSAGES['invalid_user_token'])
 
     try:        
         payload = jwt.decode(token, SECRET_KEY, True, JWT_DECODE_AGLS, options=JWT_OPTIONS)  #Handles exp and signature validation.
 
     except:
-        raise exClass(AUTH_MESSAGES['invalidUserToken'])
+        raise ex_class(AUTH_MESSAGES['invalid_user_token'])
 
     try:
-        userId = int(payload['id'])          
+        user_id = int(payload['id'])          
         last = payload['l']
 
     except:
-        raise exClass(AUTH_MESSAGES['invalidUserToken'])    
+        raise ex_class(AUTH_MESSAGES['invalid_user_token'])    
 
     try:        
-        user = User.objects.get(pk=userId)        
+        user = User.objects.get(pk=user_id)        
     except User.DoesNotExist:
-        raise exClass(AUTH_MESSAGES['invalidUserToken'])
+        raise ex_class(AUTH_MESSAGES['invalid_user_token'])
 
-    userLast = user.lastPasswordChange.isoformat() if user.lastPasswordChange else ""
-    if userLast != last:
-        raise exClass(AUTH_MESSAGES['invalidUserToken'])
+    user_last = user.last_password_change.isoformat() if user.last_password_change else ""
+    if user_last != last:
+        raise ex_class(AUTH_MESSAGES['invalid_user_token'])
 
-    if validateAdditional:
-        validateUserAuthStatus(user, exClass)       
+    if validate_additional:
+        validate_user_auth_status(user, ex_class)       
 
     return (user, payload)
             
@@ -156,20 +156,20 @@ def validateUserJWT(token, validateAdditional = True, exClass = AuthenticationFa
 from os import urandom
 from base64 import b64encode
 
-def _createSecretKey(length):  
+def _create_secret_key(length):  
     '''
         Creates a random key of length bytes using os random number generator.
     '''  
     return b64encode(urandom(length))   
 
 
-adminAuthLogger = logging.getLogger('administration.site.auth')
+admin_auth_logger = logging.getLogger('administration.site.auth')
 
 #Attach login failures event to standard django's auth framework
 #This is basically the admin login
 #Will be removed once custom login is implemented.
 def login_attempt_failure_handler(sender, **kwargs):
-    adminAuthLogger.warn("Failed admin login.", extra={'extra':unicode(kwargs.get('credentials',''))})
+    admin_auth_logger.warn("Failed admin login.", extra={'extra':unicode(kwargs.get('credentials',''))})
     
 user_login_failed.connect(login_attempt_failure_handler)
 
@@ -177,13 +177,13 @@ user_login_failed.connect(login_attempt_failure_handler)
 #region password validation
 
 
-def getUserPasswordValidatorMessages():
+def get_user_password_validator_messages():
     '''
         Returns a list of all password requirements.
     '''
     return password_validators_help_texts()
 
-def validateUserPassword(user, password):
+def validate_user_password(user, password):
     '''
         Checks user passwords against settings passwords validators.
         Raises ValidationError (django) if any validator fails, with the associated validator message.        
@@ -193,17 +193,17 @@ def validateUserPassword(user, password):
     validate_password(password, user)
 
 
-def setUserPassword(user, password):
+def set_user_password(user, password):
     '''
         Sets the user password running password hash algorithms
-        No validation is done, call validateUserPassword first.        
+        No validation is done, call validate_user_password first.        
     '''
 
     user.set_password(password)
-    user.lastPasswordChange = timezone.now()
+    user.last_password_change = timezone.now()
     
 
-def checkUserPassword(user, password):
+def check_user_password(user, password):
     '''
         Checks if user password is valid, returns True or False
     '''
@@ -214,12 +214,12 @@ def checkUserPassword(user, password):
 
 #For admin create other validation as we might want different kind.
 
-def validateAdminPassword(user, password):
+def validate_admin_password(user, password):
 
     #Validate through default validators
     validate_password(password, user)
 
-def setAdminPassword(user, password):    
+def set_admin_password(user, password):    
     user.set_password(password)
   
 
@@ -228,14 +228,14 @@ def setAdminPassword(user, password):
 
 #Region user password recovery
 
-def createUserPasswordRecoveryToken(user):
+def create_user_password_recovery_token(user):
     '''
         Returns a JWT that can be used to recover a lost password.
     '''
     
     payload = {
             'id':user.pk,
-            'last': user.lastPasswordChange.isoformat() if user.lastPasswordChange else "", #Use last password changed date so token is invalidated on change.
+            'last': user.last_password_change.isoformat() if user.last_password_change else "", #Use last password changed date so token is invalidated on change.
             'exp':datetime.utcnow() + PASSWORD_RECOVERY_TOKEN_EXPIRATION
         }
 
@@ -243,35 +243,35 @@ def createUserPasswordRecoveryToken(user):
     return jwt.encode(payload, RESET_TOKEN_SECRET_KEY, ALGORITHM)
 
 
-def validateUserPasswordRecoveryToken(token, exClass=PermissionDenied):
+def validate_user_password_recovery_token(token, ex_class=PermissionDenied):
     '''
         Validates a user password recovery token and returns a user instance.
     '''
 
     if not token:
-        raise exClass(AUTH_MESSAGES['invalidPasswordRecoveryToken'])
+        raise ex_class(AUTH_MESSAGES['invalid_password_recovery_token'])
 
     try:        
         payload = jwt.decode(token, RESET_TOKEN_SECRET_KEY, True, JWT_DECODE_AGLS, options=JWT_OPTIONS)
     except:
-        raise exClass(AUTH_MESSAGES['invalidPasswordRecoveryToken'])
+        raise ex_class(AUTH_MESSAGES['invalid_password_recovery_token'])
 
     try:
-        userId = int(payload['id'])           
+        user_id = int(payload['id'])           
         last = payload['last']
 
     except:
-        raise exClass(AUTH_MESSAGES['invalidPasswordRecoveryToken'])
+        raise ex_class(AUTH_MESSAGES['invalid_password_recovery_token'])
 
     try:
-        user = User.objects.get(pk=userId)
+        user = User.objects.get(pk=user_id)
     except User.DoesNotExist:
-        raise exClass(AUTH_MESSAGES['invalidPasswordRecoveryToken'])
+        raise ex_class(AUTH_MESSAGES['invalid_password_recovery_token'])
 
    
-    userLast = user.lastPasswordChange.isoformat() if user.lastPasswordChange else ""
-    if userLast != last:
-        raise exClass(AUTH_MESSAGES['invalidPasswordRecoveryToken'])
+    user_last = user.last_password_change.isoformat() if user.last_password_change else ""
+    if user_last != last:
+        raise ex_class(AUTH_MESSAGES['invalid_password_recovery_token'])
 
 
     return user

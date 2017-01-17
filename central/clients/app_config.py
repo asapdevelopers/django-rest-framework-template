@@ -12,13 +12,13 @@ class Config(AppConfig):
          
     def ready(self):        
 
-        if not hasattr(self, 'isStarted'):
-            self.isStarted = False           
+        if not hasattr(self, 'is_started'):
+            self.is_started = False           
 
                 
         #Do not run if already started or management command
-        if not self.isStarted and len(sys.argv) > 0 and not sys.argv[0].endswith('manage.py'):
+        if not self.is_started and len(sys.argv) > 0 and not sys.argv[0].endswith('manage.py'):
             #Code that needs to be ran before app start can be run here.
             pass
             
-        self.isStarted = True
+        self.is_started = True

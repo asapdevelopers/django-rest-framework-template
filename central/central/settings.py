@@ -206,7 +206,7 @@ _middlewares = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'administration.middlewares.exceptionHandler.ExceptionMiddleware'
+    'administration.middlewares.exception_handler.ExceptionMiddleware'
     
 )
 
@@ -231,7 +231,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'rest_framework',
     'clients',
-    'logsApp',
+    'logs_app',
     'administration',      
     'corsheaders',
     'jsoneditor'    
@@ -385,12 +385,12 @@ REST_FRAMEWORK = {
                
 
     'DEFAULT_PARSER_CLASSES': (
-        'clients.customParsers.LimitedJSONParser',
-        'clients.customParsers.LimitedFormParser',
+        'clients.custom_parsers.LimitedJSONParser',
+        'clients.custom_parsers.LimitedFormParser',
         'rest_framework.parsers.MultiPartParser',
     ),
     'DEFAULT_RENDERER_CLASSES': (
-        'clients.customRenderers.FasterJSONRenderer',
+        'clients.custom_renderers.FasterJSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',    #browsable api
         
     ),
@@ -404,7 +404,7 @@ REST_FRAMEWORK = {
     ),
     'NON_FIELD_ERRORS_KEY':'__all__',    #Error key to be used for non field validation errors, make it match django's one.
 
-    'EXCEPTION_HANDLER': 'clients.api.exceptionHandler.customExceptionHandler'
+    'EXCEPTION_HANDLER': 'clients.api.exception_handler.custom_exception_handler'
 }
 
 

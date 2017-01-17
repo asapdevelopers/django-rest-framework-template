@@ -9,11 +9,11 @@ class CentralErrorLog(models.Model):
         This is pretty much unhandled or unexpected exceptions.
     '''
     level = models.CharField(max_length=50)
-    logName = models.CharField(max_length=255,blank=True, null=True)
-    fileName = models.CharField(max_length=1024,blank=True, null=True)
-    lineNumber = models.IntegerField(blank=True, null=True)
+    log_name = models.CharField(max_length=255,blank=True, null=True)
+    file_name = models.CharField(max_length=1024,blank=True, null=True)
+    line_number = models.IntegerField(blank=True, null=True)
     
-    userId = models.IntegerField(blank=True, null=True)
+    user_id = models.IntegerField(blank=True, null=True)
     date = models.DateTimeField()
     
 

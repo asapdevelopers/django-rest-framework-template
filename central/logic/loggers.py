@@ -2,7 +2,7 @@ import logging
 import sys
 import locale
 from django.utils import timezone
-from logic.threadPool import ThreadPool
+from logic.thread_pool import ThreadPool
 
 #Use a thread pool to offload db logs 
 #so we can bypass any existing transaction. Otherwise logs would get rolled back.
@@ -41,18 +41,18 @@ class CentralErrorLogger(logging.Handler):
         Logs to the central error log db table.
     '''   
 
-    logModel = None
+    log_model = None
 
     @classmethod
-    def getLogModel(cls):
+    def get_log_model(cls):
         '''
             Need to lazy load model.
         '''
 
-        if not cls.logModel:
-            from logsApp.models import CentralErrorLog
-            cls.logModel = CentralErrorLog
-        return cls.logModel
+        if not cls.log_model:
+            from logs_app.models import CentralErrorLog
+            cls.log_model = CentralErrorLog
+        return cls.log_model
 
    
     def __init__(self):    
@@ -60,10 +60,10 @@ class CentralErrorLogger(logging.Handler):
         
     def emit(self, record):       
         try:
-            cls = self.getLogModel()
+            cls = self.get_log_model()
 
             extra = getattr(record,'extra', None)
-            userId = getattr(record,'userId', None)
+            user_id = getattr(record,'user_id', None)
 
             # If no extra data, try to get data from request if the logger has it
             if not extra:
@@ -74,17 +74,17 @@ class CentralErrorLogger(logging.Handler):
                     try:
                         data = getattr(request, 'data', '')
                         xff = request.META.get('HTTP_X_FORWARDED_FOR')
-                        remoteAddr = request.META.get('REMOTE_ADDR')
-                        extra = u"[{}] {}\n{}\n{} - {}".format(request.method, request.path, data, xff, remoteAddr)
+                        remote_addr = request.META.get('REMOTE_ADDR')
+                        extra = u"[{}] {}\n{}\n{} - {}".format(request.method, request.path, data, xff, remote_addr)
                     except Exception as e:
                         extra = "Failed to get extra request data: " + unicode(e)
                     
             t = cls(
                 level = record.levelname,
-                logName = record.name,
-                fileName = record.filename,
-                lineNumber = record.lineno,                
-                userId = userId,
+                log_name = record.name,
+                file_name = record.filename,
+                line_number = record.lineno,                
+                user_id = user_id,
                 date=timezone.now(), 
                 message=self.format(record)[:2048],
                 extra = extra[:2048] if extra else None

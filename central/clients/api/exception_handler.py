@@ -14,11 +14,11 @@ import logging
 import traceback
 
 
-authLogger = logging.getLogger('clients.api.auth')
-validationLogger = logging.getLogger('clients.api.validation')
-dataLogger = logging.getLogger('clients.api.data')
-othersLogger = logging.getLogger('clients.api.others')
-throttledLogger = logging.getLogger('clients.api.throttled')
+auth_logger = logging.getLogger('clients.api.auth')
+validation_logger = logging.getLogger('clients.api.validation')
+data_logger = logging.getLogger('clients.api.data')
+others_logger = logging.getLogger('clients.api.others')
+throttled_logger = logging.getLogger('clients.api.throttled')
 
 
 NON_FIELDS_KEY = api_settings.NON_FIELD_ERRORS_KEY
@@ -34,7 +34,7 @@ NON_FIELDS_KEY = api_settings.NON_FIELD_ERRORS_KEY
 # ---------- Custom exception handler ------------
 
 #Associate a code to usually used django rest framework api exception
-defaultExceptionsDict = {
+default_exceptions_dict = {
     ValidationError : ExceptionCodes.validationError,
     AuthenticationFailed : ExceptionCodes.authenticationError,
     NotAuthenticated : ExceptionCodes.authenticationError,
@@ -46,26 +46,26 @@ defaultExceptionsDict = {
 }
 
 #Map known api exceptions to loggers
-apiExcLoggers = {
-    ValidationError : validationLogger.info,
+api_exc_loggers = {
+    ValidationError : validation_logger.info,
 
     #These two should probably be removed once production because errors related to not being able to
     #authenticate won't go through any throttler.
-    AuthenticationFailed : authLogger.warn,
-    NotAuthenticated : authLogger.warn,
+    AuthenticationFailed : auth_logger.warn,
+    NotAuthenticated : auth_logger.warn,
 
-    PermissionDenied : authLogger.warn,
-    ParseError : othersLogger.info,
-    NotFound : othersLogger.info,
-    MethodNotAllowed: othersLogger.info,
-    OperationError: othersLogger.error,
-    NotAcceptable: othersLogger.info,
-    UnsupportedMediaType: othersLogger.info,
-    Throttled: throttledLogger.info
+    PermissionDenied : auth_logger.warn,
+    ParseError : others_logger.info,
+    NotFound : others_logger.info,
+    MethodNotAllowed: others_logger.info,
+    OperationError: others_logger.error,
+    NotAcceptable: others_logger.info,
+    UnsupportedMediaType: others_logger.info,
+    Throttled: throttled_logger.info
 
 }
 
-def _getExtra(context):
+def _get_extra(context):
     request = context.get('request',None)
     
     if not request:
@@ -91,20 +91,20 @@ def _getExtra(context):
     #Set the property
     try:
         user = unicode(request.user)
-        userId = getattr(request.user, 'pk', None)
+        user_id = getattr(request.user, 'pk', None)
     except:
         user = "AnonymousUser"
-        userId = None
+        user_id = None
 
     xff = request.META.get('HTTP_X_FORWARDED_FOR')
-    remoteAddr = request.META.get('REMOTE_ADDR')
+    remote_addr = request.META.get('REMOTE_ADDR')
 
     return {
-        'extra': u"[{}] {}\n{}\n{} - {}\n\n{}".format(request.method,request.path,user,xff,remoteAddr, data),
-        'userId':userId
+        'extra': u"[{}] {}\n{}\n{} - {}\n\n{}".format(request.method,request.path,user,xff,remote_addr, data),
+        'user_id':user_id
     }
 
-def customExceptionHandler(exc, context):
+def custom_exception_handler(exc, context):
     '''
 
     '''
@@ -127,13 +127,13 @@ def customExceptionHandler(exc, context):
         #Add special code for validation so we can tell clients easier that the result
         #is an api validation error which includes a dict of key-values for each field
         if not result['code']:
-            result['code'] = defaultExceptionsDict.get(type(exc),None)
+            result['code'] = default_exceptions_dict.get(type(exc),None)
 
         res = Response(result, status=exc.status_code, headers=headers)
 
-        apilogger = apiExcLoggers.get(type(exc),None)
+        apilogger = api_exc_loggers.get(type(exc),None)
         if apilogger:
-            apilogger(force_text(result), extra=_getExtra(context))
+            apilogger(force_text(result), extra=_get_extra(context))
 
        
                 
@@ -142,33 +142,33 @@ def customExceptionHandler(exc, context):
         result['detail'] = exc.message_dict     
         result['code'] = ExceptionCodes.validationError    
         res = Response(result, status=status.HTTP_400_BAD_REQUEST)
-        validationLogger.info(force_text(result), extra=_getExtra(context))
+        validation_logger.info(force_text(result), extra=_get_extra(context))
 
     elif isinstance(exc, ValueError):
         #Some unchecked errors that should rarely happen    
         result['detail'] = {NON_FIELDS_KEY:[force_text(exc)]}
         result['code'] = ExceptionCodes.validationError    
         res = Response(result, status=status.HTTP_400_BAD_REQUEST)
-        validationLogger.info(force_text(result), extra=_getExtra(context))
+        validation_logger.info(force_text(result), extra=_get_extra(context))
 
     elif isinstance(exc, Http404):
         result['detail'] = u'Not found.'
         result['code'] = ExceptionCodes.notFound          
         res = Response(result, status=status.HTTP_404_NOT_FOUND)
-        othersLogger.info(force_text(result), extra=_getExtra(context))
+        others_logger.info(force_text(result), extra=_get_extra(context))
 
     elif isinstance(exc, dPermissionDenied):
         result['detail'] = u'Permission denied.'      
         result['code'] = ExceptionCodes.permissionError
         res = Response(result, status=status.HTTP_403_FORBIDDEN)
-        authLogger.warn(force_text(result), extra=_getExtra(context))
+        auth_logger.warn(force_text(result), extra=_get_extra(context))
 
     elif isinstance(exc, (DataError, IntegrityError)):
         result['detail'] = force_text(exc)
         result['code'] = ExceptionCodes.dataError
         res = Response(result, status=status.HTTP_400_BAD_REQUEST)
         
-        dataLogger.error(force_text(result) + "\n" + traceback.format_exc(), extra=_getExtra(context))
+        data_logger.error(force_text(result) + "\n" + traceback.format_exc(), extra=_get_extra(context))
     
 
     elif isinstance(exc, Error):
@@ -176,7 +176,7 @@ def customExceptionHandler(exc, context):
         result['code'] = ExceptionCodes.dbError
         res = Response(result, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        dataLogger.critical(force_text(result) + "\n" + traceback.format_exc(), extra=_getExtra(context))
+        data_logger.critical(force_text(result) + "\n" + traceback.format_exc(), extra=_get_extra(context))
 
     else:
         result['detail'] = u"Unknown error: " + force_text(exc)   
@@ -184,7 +184,7 @@ def customExceptionHandler(exc, context):
 
         res = Response(result, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        othersLogger.critical(force_text(result) + "\n"+ traceback.format_exc(), extra=_getExtra(context))        
+        others_logger.critical(force_text(result) + "\n"+ traceback.format_exc(), extra=_get_extra(context))        
 
     return res
 

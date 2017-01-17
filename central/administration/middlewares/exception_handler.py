@@ -12,13 +12,13 @@ import traceback
 
 logger = logging.getLogger('administration.site.others')
 
-def _getExtra(request):
+def _get_extra(request):
         
     if not request:
         return None
 
     xff = request.META.get('HTTP_X_FORWARDED_FOR')
-    remoteAddr = request.META.get('REMOTE_ADDR')
+    remote_addr = request.META.get('REMOTE_ADDR')
 
     #Use a try catch just in case error happened when authenticating user and the framework failed to
     #Set the property
@@ -27,7 +27,7 @@ def _getExtra(request):
     except:
         user = "AnonymousUser"
 
-    return u"[{}] {}\n{}\n{} - {}\n\n{}".format(request.method,request.path,user, xff, remoteAddr, request.GET or request.POST)
+    return u"[{}] {}\n{}\n{} - {}\n\n{}".format(request.method,request.path,user, xff, remote_addr, request.GET or request.POST)
 
 class ExceptionMiddleware(object):
     
@@ -56,12 +56,12 @@ class ExceptionMiddleware(object):
             #admin page model not found
             if isinstance(exception, Http404):
                 msg = unicode(exception)
-                logger.warn(u"{0}: \n{1}".format(msg, "Not found"),extra={'extra':_getExtra(request)})
+                logger.warn(u"{0}: \n{1}".format(msg, "Not found"),extra={'extra':_get_extra(request)})
                 
                 return HttpResponseNotFound("Not found: " + msg)
 
             else:
-                logger.error(u"{0} ( {1} ) : \n{2}".format(unicode(exception), unicode(exception.args), ''), extra={'extra':_getExtra(request)})
+                logger.error(u"{0} ( {1} ) : \n{2}".format(unicode(exception), unicode(exception.args), ''), extra={'extra':_get_extra(request)})
 
                 if not request.is_ajax():
                     #For now return the same.

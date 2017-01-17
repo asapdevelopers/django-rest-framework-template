@@ -14,9 +14,9 @@ from django.contrib.admin import SimpleListFilter, ListFilter
 from django.contrib import messages
 from django.contrib.postgres.fields import JSONField
 from jsoneditor.widgets import JSONEditor
-import administration.models as adminModels
-import logsApp.models as logModels
-import clients.models as clientsModels
+import administration.models as admin_models
+import logs_app.models as log_models
+import clients.models as clients_models
 from logic import auth
 import json
 import re
@@ -38,7 +38,7 @@ class NullListFilter(SimpleListFilter):
     def lookups(self, request, model_admin):
         return (
             ('1', self.null or 'null', ),
-            ('0', self.notNull or 'not null', ),
+            ('0', self.not_null or 'not null', ),
         )
 
     def queryset(self, request, queryset):
@@ -47,12 +47,12 @@ class NullListFilter(SimpleListFilter):
             return queryset.filter(**kwargs)
         return queryset
 
-def getNullListFilter(field, name = None, nullLabel = None, notNullLabel = None):
+def get_null_list_filter(field, name = None, null_label = None, not_null_label = None):
     class NullListFieldFilter(NullListFilter):
         parameter_name = field
         title = name or parameter_name
-        null = nullLabel
-        notNull = notNullLabel
+        null = null_label
+        not_null = not_null_label
 
     return NullListFieldFilter
 
@@ -61,7 +61,7 @@ class SingleTextInputFilter(ListFilter):
         Custom filter to allow textbox input filtering.        
     """
     parameter_name = None
-    template = "administration/textboxFilter.html"
+    template = "administration/textbox_filter.html"
 
     def __init__(self, request, params, model, model_admin):
         super(SingleTextInputFilter, self).__init__(
@@ -98,7 +98,7 @@ class SingleTextInputFilter(ListFilter):
             'parameter_name': self.parameter_name
         }, )
 
-def getTextFilter(field, name = None):
+def get_text_filter(field, name = None):
     class SingleTextInputFieldFilter(SingleTextInputFilter):
         parameter_name = field
         title = name or parameter_name
@@ -144,7 +144,7 @@ class AdministratorChangeForm(forms.ModelForm):
     """
 
     class Meta:
-        model = adminModels.Administrator       
+        model = admin_models.Administrator       
         fields = '__all__'
 
     password = forms.CharField(label="Password", 
@@ -172,11 +172,11 @@ class AdministratorChangeForm(forms.ModelForm):
             password = cleaned_data.get('password',None)
             if password:
                 try:
-                    auth.validateAdminPassword(self.instance,password)
+                    auth.validate_admin_password(self.instance,password)
                 except ValidationError as e:
                     raise ValidationError({'password':e})
 
-                auth.setAdminPassword(self.instance,password)
+                auth.set_admin_password(self.instance,password)
 
                 #Set hashed password
                 cleaned_data['password'] = self.instance.password
@@ -191,18 +191,18 @@ class AdministratorChangeForm(forms.ModelForm):
 
 class AdministratorAdmin(admin.ModelAdmin):
     form = AdministratorChangeForm
-    list_display = ('email', 'firstName', 'lastName', 'last_login')
+    list_display = ('email', 'first_name', 'last_name', 'last_login')
     search_fields = ('email',)
     
 
-admin.site.register(adminModels.Administrator, AdministratorAdmin)
+admin.site.register(admin_models.Administrator, AdministratorAdmin)
 
 #region clients models
 
 class UserChangeForm(forms.ModelForm):
     
     class Meta:
-        model = clientsModels.User       
+        model = clients_models.User       
         fields = '__all__'
 
     password = forms.CharField(label="Password", 
@@ -233,11 +233,11 @@ class UserChangeForm(forms.ModelForm):
             password = cleaned_data.get('password',None)
             if password:
                 try:
-                    auth.validateUserPassword(self.instance,password)
+                    auth.validate_user_password(self.instance,password)
                 except ValidationError as e:
                     raise ValidationError({'password':e})
 
-                auth.setUserPassword(self.instance,password)
+                auth.set_user_password(self.instance,password)
 
                 #Set hashed password
                 cleaned_data['password'] = self.instance.password
@@ -259,7 +259,7 @@ class UserAdmin(admin.ModelAdmin):
    
     def impersonation_token(self, instance):
         if instance.pk: 
-            return auth.createUserJWT(instance) 
+            return auth.create_user_JWT(instance) 
            
         else:
             return ""
@@ -270,16 +270,16 @@ class UserAdmin(admin.ModelAdmin):
     readonly_fields = ('impersonation_token',)
     search_fields = ('email', )
 
-admin.site.register(clientsModels.User, UserAdmin)
+admin.site.register(clients_models.User, UserAdmin)
 
 #endregion
 #----------------------------------------------------------------
 
 class CentralErrorLogAdmin(admin.ModelAdmin):
-    model = logModels.CentralErrorLog
-    list_display = ('date','level','logName','message')    
+    model = log_models.CentralErrorLog
+    list_display = ('date','level','log_name','message')    
 
-    list_filter = ['level','logName','fileName']
+    list_filter = ['level','log_name','file_name']
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         formfield = super(CentralErrorLogAdmin, self).formfield_for_dbfield(db_field, **kwargs)
@@ -287,7 +287,7 @@ class CentralErrorLogAdmin(admin.ModelAdmin):
             formfield.widget = forms.Textarea(attrs=formfield.widget.attrs)
         return formfield
     
-admin.site.register(logModels.CentralErrorLog, CentralErrorLogAdmin)
+admin.site.register(log_models.CentralErrorLog, CentralErrorLogAdmin)
 
 
 #Unregister some

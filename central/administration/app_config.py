@@ -12,11 +12,11 @@ class Config(AppConfig):
          
     def ready(self):        
 
-        if not hasattr(self, 'isStarted'):
-            self.isStarted = False           
+        if not hasattr(self, 'is_started'):
+            self.is_started = False           
         
-        if not self.isStarted:
+        if not self.is_started:
             #Code that needs to be ran before app start can be run here.
             pass
             
-        self.isStarted = True
+        self.is_started = True

@@ -55,7 +55,7 @@ class UserProfilePictureFolder(object):
 #region ---------- S3 file handling ---------------
 
 
-def safeS3Path(path):
+def safe_S3_path(path):
     '''
         converts a path into a safe aws s3 path doing url encoding. This is required when not using boto3 to
         generate urls.
@@ -68,9 +68,9 @@ def safeS3Path(path):
     return "/".join(quote(v) for v in encoded.split('/'))
 
 
-def handleException(e, reraiseMsg):
-    s3logger.critical(reraiseMsg, extra={'extra':unicode(e)})    
-    raise OperationError(reraiseMsg, ExceptionCodes.s3Error)
+def handle_exception(e, reraise_msg):
+    s3logger.critical(reraise_msg, extra={'extra':unicode(e)})    
+    raise OperationError(reraise_msg, ExceptionCodes.s3Error)
 
 
 class S3StreamWrapper(BufferedIOBase):
@@ -119,17 +119,17 @@ class S3RawFile(BufferedReader):
     '''
     S3 Raw file with buffered reading. File is not seekable but is streamed directly from S3
     Will provide properties from s3:
-        name, size, contentType, lastModified, meta
+        name, size, content_type, last_modified, meta
     ''' 
 
-    def __init__(self, storage, name, stream, contentType, size, lastModified, meta):
+    def __init__(self, storage, name, stream, content_type, size, last_modified, meta):
         super(S3RawFile, self).__init__(S3StreamWrapper(stream), 64*1024)   # Larger buffer since S3 is really fast
         self.storage = storage
 
         self.key = name        
         self.size = size
-        self.contentType = contentType
-        self.lastModified = lastModified
+        self.content_type = content_type
+        self.last_modified = last_modified
         self.meta = meta
 
     # For some reason can override the name property
@@ -137,13 +137,13 @@ class S3RawFile(BufferedReader):
     def name(self):
         return self.key
 
-    def toTemp(self):
+    def to_temp(self):
         '''
         returns a S3TempFile version of this RawFile instance, reading the whole stream and closing
         the connection.
         '''
 
-        res = S3TempFile(self.storage, self.name, self, self.contentType, self.size, self.lastModified, self.meta)
+        res = S3TempFile(self.storage, self.name, self, self.content_type, self.size, self.last_modified, self.meta)
         self.close()
         return res
 
@@ -152,16 +152,16 @@ class S3TempFile(BufferedRandom):
     '''
     S3 file downloaded to a temporary local file, making it seekable
     Will provide properties from s3:
-        name, size, contentType, lastModified, meta
+        name, size, content_type, last_modified, meta
     ''' 
 
-    def __init__(self, storage, name, stream, contentType, size, lastModified, meta):
+    def __init__(self, storage, name, stream, content_type, size, last_modified, meta):
         self.storage = storage
 
         # Do memory/tempfile spooling here since we now the file size beforehand
         # so we don't have the overhead of a spooled file with auto roll
 
-        if size > storage.maxMemoryFileSize:
+        if size > storage.max_memory_file_size:
             data = TemporaryFile(mode='w+b', prefix='s3temp')
             shutil.copyfileobj(stream, data, 64 * 1024) # Use a bigger buffer size
             data.seek(0)
@@ -174,8 +174,8 @@ class S3TempFile(BufferedRandom):
 
         self.key = name        
         self.size = size
-        self.contentType = contentType
-        self.lastModified = lastModified
+        self.content_type = content_type
+        self.last_modified = last_modified
         self.meta = meta
 
     # For some reason can override the name property
@@ -195,21 +195,21 @@ class BaseS3Storage(Storage):
     '''
 
     #----- Credentials ----
-    s3Key = None
-    s3Secret = None
-    s3Bucket = None
+    s3_key = None
+    s3_secret = None
+    s3_bucket = None
 
     #----- Defaults ------
     #This class is intended to be overriden to create various storage backends
     #to be used with django rather than manually creating a backend.
 
-    storageClass = 'STANDARD' #|'REDUCED_REDUNDANCY'|'STANDARD_IA'
+    storage_class = 'STANDARD' #|'REDUCED_REDUNDANCY'|'STANDARD_IA'
     acl = 'private' #|'public-read'|'public-read-write'|'authenticated-read'|'aws-exec-read'|
-    cacheControl = 'max-age=31536000, public'   #1 year    
-    defaultContentType = "application/octet-stream"
+    cache_control = 'max-age=31536000, public'   #1 year    
+    default_content_type = "application/octet-stream"
 
-    urlExpiration = 60*60*24              #1 day in seconds. Can be either None or False for no expiration links.
-    maxMemoryFileSize = 1024*1024*10      #10mb max in memory size for downloaded files, will fallback to temp file
+    url_expiration = 60*60*24              #1 day in seconds. Can be either None or False for no expiration links.
+    max_memory_file_size = 1024*1024*10      #10mb max in memory size for downloaded files, will fallback to temp file
 
 
     #---------------------
@@ -217,55 +217,55 @@ class BaseS3Storage(Storage):
     #The storage class can not have sensitive data on its constructor because it goes into migrations otherwise.
     def __init__(self):
 
-        if not self.s3Key or not self.s3Secret or not self.s3Bucket:
+        if not self.s3_key or not self.s3_secret or not self.s3_bucket:
             raise ValueError("Missing S3 credentials")
 
 
         #Store locally for faster lookups
-        self.s3Bucket = self.s3Bucket
+        self.s3_bucket = self.s3_bucket
 
-        self.s3Client = boto3.client('s3', aws_access_key_id=self.s3Key, aws_secret_access_key=self.s3Secret)        
+        self.s3_client = boto3.client('s3', aws_access_key_id=self.s3_key, aws_secret_access_key=self.s3_secret)        
 
         #Save function locally to improve performance
-        self._generateSignedUrl = partial(self.s3Client.generate_presigned_url, 'get_object')
+        self._generate_signed_url = partial(self.s3_client.generate_presigned_url, 'get_object')
 
-        self._putObject = partial(
-                                    self.s3Client.put_object, 
+        self._put_object = partial(
+                                    self.s3_client.put_object, 
                                     ACL = self.acl,
-                                    Bucket = self.s3Bucket,
-                                    CacheControl = self.cacheControl,
-                                    StorageClass = self.storageClass
+                                    Bucket = self.s3_bucket,
+                                    CacheControl = self.cache_control,
+                                    StorageClass = self.storage_class
     
                             )
-        self._getObject = partial(self.s3Client.get_object, Bucket = self.s3Bucket)
-        self._deleteObject = partial(self.s3Client.delete_object, Bucket = self.s3Bucket)
-        self._headObject = partial(self.s3Client.head_object, Bucket = self.s3Bucket)        
-        self._publicUrl = u"https://{0}.s3.amazonaws.com/".format(self.s3Bucket) + "{0}"
+        self._get_object = partial(self.s3_client.get_object, Bucket = self.s3_bucket)
+        self._delete_object = partial(self.s3_client.delete_object, Bucket = self.s3_bucket)
+        self._head_object = partial(self.s3_client.head_object, Bucket = self.s3_bucket)        
+        self._public_url = u"https://{0}.s3.amazonaws.com/".format(self.s3_bucket) + "{0}"
 
-        if self.urlExpiration:
-            self._getUrl = partial(self.getPrivateUrl, expires=self.urlExpiration)
+        if self.url_expiration:
+            self._get_url = partial(self.get_private_url, expires=self.url_expiration)
 
         else:
-            self._getUrl = self.getPublicUrl
+            self._get_url = self.get_public_url
 
-    def uploadFile(self, name, data, meta = None ):
+    def upload_file(self, name, data, meta = None ):
         '''
             Uploads a file to S3 given its complete name and this storage bucket.
             data can be either a file like object or a byte string
             meta should be a k,v dict
         '''
         try:            
-            self._putObject(
+            self._put_object(
                     Body = data,
-                    ContentType = mimetypes.guess_type(name,strict=False)[0] or self.defaultContentType,                
+                    ContentType = mimetypes.guess_type(name,strict=False)[0] or self.default_content_type,                
                     Key = name,
                     Metadata = meta or {},
                 )
         except Exception as e:
-            handleException(e, "Failed to upload file.")
+            handle_exception(e, "Failed to upload file.")
             
 
-    def downloadFile(self, name, stream = True):
+    def download_file(self, name, stream = True):
         '''
             Downloads a file from s3 returning a S3RawFile or S3TempFile instance
                 depending on the stream flag.
@@ -279,7 +279,7 @@ class BaseS3Storage(Storage):
         '''
 
         try:
-            result = self._getObject(Key=name)
+            result = self._get_object(Key=name)
         
             if stream:                
                 res = S3RawFile(self, name, result['Body'], result["ContentType"], result["ContentLength"], result["LastModified"], result["Metadata"])
@@ -296,44 +296,44 @@ class BaseS3Storage(Storage):
                     s3logger.warn("File not found at S3 when attempting download.",extra={'extra':name})
                     raise NotFound("File not found.")
 
-            handleException(e, "Failed to download file.")
+            handle_exception(e, "Failed to download file.")
         except Exception as e:
-            handleException(e, "Failed to download file.")
+            handle_exception(e, "Failed to download file.")
 
 
-    def getPublicUrl(self, name):
+    def get_public_url(self, name):
         '''
             No checks are done if file doesn't exist.
         '''
-        #return self.generateSignedUrl(Params = {"Bucket":self.s3Bucket, "Key":name}, ExpiresIn=31536000) #1 year
-        return self._publicUrl.format(safeS3Path(name))
+        #return self.generate_signed_url(Params = {"Bucket":self.s3_bucket, "Key":name}, ExpiresIn=31536000) #1 year
+        return self._public_url.format(safe_S3_path(name))
 
-    def getPrivateUrl(self, name, expires):
+    def get_private_url(self, name, expires):
         '''
             Signed url for private files with expires in seconds.
         '''
-        return self._generateSignedUrl(Params = {"Bucket":self.s3Bucket, "Key":name}, ExpiresIn=expires)
+        return self._generate_signed_url(Params = {"Bucket":self.s3_bucket, "Key":name}, ExpiresIn=expires)
     
 
 
-    def deleteFile(self, name):
+    def delete_file(self, name):
         '''
             Deletes a file. The s3 service doesn't seem to raise errors if file not found.
         '''
         try:
-            self._deleteObject(Key=name)
+            self._delete_object(Key=name)
         except Exception as e:
-            handleException(e, "Failed to delete file.")
+            handle_exception(e, "Failed to delete file.")
 
-    def headFile(self, name):
+    def head_file(self, name):
         '''
             Performs a HEAD request to determine if a file exists and get its metadata.
             
             Returns {
                 
-                contentType
+                content_type
                 size
-                lastModified : datetime
+                last_modified : datetime
                 meta : object meta        
 
             }
@@ -341,11 +341,11 @@ class BaseS3Storage(Storage):
             Raises NotFound if file not found due to 404 code.
         '''
         try:
-            d = self._headObject(Key=name)
+            d = self._head_object(Key=name)
             return {
-                'contentType':d['ContentType'],
+                'content_type':d['ContentType'],
                 'size':d["ContentLength"],
-                'lastModified':d['LastModified'],
+                'last_modified':d['LastModified'],
                 'meta':d['Metadata']
     
             }
@@ -355,9 +355,9 @@ class BaseS3Storage(Storage):
                 if status == 404:
                     raise NotFound("File not found.")
 
-            handleException(e, "Failed to head file.")
+            handle_exception(e, "Failed to head file.")
         except Exception as e:
-            handleException(e, "Failed to head file.")
+            handle_exception(e, "Failed to head file.")
 
     #---------------------------------------------------------------------------------------------
 
@@ -368,7 +368,7 @@ class BaseS3Storage(Storage):
         
         # S3 doesn't care about the mode will always be 'rb'
         # But allow sending a 'stream' mode to use a different download type        
-        return self.downloadFile(name)
+        return self.download_file(name)
 
     def save(self, name, content, max_length=None):
 
@@ -381,7 +381,7 @@ class BaseS3Storage(Storage):
         if name is None:
             raise ValueError("File to save needs a name.")
         
-        self.uploadFile(name,content)
+        self.upload_file(name,content)
 
         return name
 
@@ -395,14 +395,14 @@ class BaseS3Storage(Storage):
         return name
 
     def delete(self, name):
-        self.deleteFile(name)
+        self.delete_file(name)
 
     def path(self, name):
-        return self.s3Bucket + ": " + name
+        return self.s3_bucket + ": " + name
 
     def exists(self, name):
         try:
-            self.headFile(name)
+            self.head_file(name)
             return True
         except NotFound:
             return False
@@ -417,24 +417,24 @@ class BaseS3Storage(Storage):
 
     def size(self, name):
         s3logger.warn('Storage size method called instead of file.')
-        return self.headFile(name)['size']
+        return self.head_file(name)['size']
         
     
     def url(self, name):
-        return self._getUrl(name)
+        return self._get_url(name)
 
 
     def head(self,name):
         '''
             Custom for this storage, allows retrieval of S3 metadata through HEAD request.
             returns{
-                contentType,
+                content_type,
                 size,
-                lastModified,
+                last_modified,
                 meta
             }
         '''    
-        return self.headFile(name)
+        return self.head_file(name)
 
     def generate_filename(self, filename):
         '''
@@ -444,13 +444,13 @@ class BaseS3Storage(Storage):
         return self.get_valid_name(filename)
 
     def accessed_time(self, name):
-        raise NotImplementedError('Not implemented, open file and check lastModified field instead.')
+        raise NotImplementedError('Not implemented, open file and check last_modified field instead.')
 
     def created_time(self, name):
-        raise NotImplementedError('Not implemented, open file and check lastModified field instead.')
+        raise NotImplementedError('Not implemented, open file and check last_modified field instead.')
 
     def modified_time(self, name):
-        raise NotImplementedError('Not implemented, open file and check lastModified field instead.')
+        raise NotImplementedError('Not implemented, open file and check last_modified field instead.')
 
 # Example
 class UserPicturesStorage(BaseS3Storage):
@@ -458,11 +458,11 @@ class UserPicturesStorage(BaseS3Storage):
         Storage for user profile pictures, override some defaults.
     '''
     
-    s3Key = S3_KEY
-    s3Secret = S3_SECRET
-    s3Bucket = UPLOAD_BUCKET
+    s3_key = S3_KEY
+    s3_secret = S3_SECRET
+    s3_bucket = UPLOAD_BUCKET
 
-    maxMemoryFileSize = 1024*1024*2      #2mb
+    max_memory_file_size = 1024*1024*2      #2mb
 
     
 
@@ -473,4 +473,4 @@ class UserPicturesStorage(BaseS3Storage):
 
 #Instantiate some storages we need
 
-userPicturesStorage = UserPicturesStorage()
+user_picture_storage = UserPicturesStorage()

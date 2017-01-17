@@ -10,10 +10,10 @@ from django.contrib.postgres.fields import JSONField
 
 class UserManager(BaseUserManager):
 
-    def create_user(self, email, password=None, **extraArgs):
+    def create_user(self, email, password=None, **extra_args):
         raise Exception("Can not create users with this method.")
 
-    def create_superuser(self, email, password=None, **extraArgs):
+    def create_superuser(self, email, password=None, **extra_args):
         raise Exception("Can not create superusers of this kind.")
         
 
@@ -23,11 +23,11 @@ class User(AbstractBaseUser):
     email = models.CharField(max_length=250, unique=True)    
     USERNAME_FIELD = 'email'   
     
-    firstName = models.CharField(max_length=250,default="", blank=True)
-    lastName = models.CharField(max_length=250,default="", blank=True)    
+    first_name = models.CharField(max_length=250,default="", blank=True)
+    last_name = models.CharField(max_length=250,default="", blank=True)    
          
     # Used for authentication
-    lastPasswordChange = models.DateTimeField(null=True, blank=True, default=timezone.now)
+    last_password_change = models.DateTimeField(null=True, blank=True, default=timezone.now)
 
     is_active = models.BooleanField(default=True)       # Field required by django
     objects = UserManager()
@@ -38,7 +38,7 @@ class User(AbstractBaseUser):
         
     
     def get_full_name(self):
-        return self.firstName + " " + self.lastName
+        return self.first_name + " " + self.last_name
     
     def get_short_name(self):
         return self.email
