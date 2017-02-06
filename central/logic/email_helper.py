@@ -16,7 +16,7 @@ from django.core.mail import get_connection
 from logic.thread_pool import ThreadPool
 import logging
 import traceback
-
+from django.utils.translation import ugettext_lazy as _
 
 
 email_sending_logger = logging.getLogger('email.sending')
@@ -25,6 +25,10 @@ EMAIL_REPLACE_REGEX = re.compile(ur'\r|\n')
 POOL = ThreadPool(workers=1)
 
 DEFAULT_FROM_EMAIL = settings.DEFAULT_FROM_EMAIL
+
+MESSAGES = {
+    'failed_to_send_email': _('Failed to send email.')
+}
 
 
 
@@ -79,7 +83,7 @@ def _send_email(email, silent=True):
         email_sending_logger.error("Failed to send email: " + unicode(e), extra={'extra': traceback.format_exc()})
 
         if not silent:
-            raise OperationError("Failed to send email.", ExceptionCodes.emailSendingError)
+            raise OperationError(MESSAGES['failed_to_send_email'], ExceptionCodes.emailSendingError)
 
 
 def send_email(subject, to = None, cc = None, bcc = None,

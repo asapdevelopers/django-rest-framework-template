@@ -3,6 +3,13 @@ from clients.models import User
 from logic import auth, email_helper
 from django.core.exceptions import ValidationError as DjangoValidationError
 from logic.exceptions import PermissionDenied
+from django.utils.translation import ugettext_lazy as _
+
+
+MESSAGES = {
+    'invalid_old_password': _("Old password is invalid"),
+    'password_must_be_different': _("New password must be different from old password.")
+}
 
 
 class AuthenticateCredentialsSerializer(serializers.Serializer):    
@@ -35,7 +42,8 @@ class RequestPasswordRecoverySerializer(serializers.Serializer):
 
 
     def save(self):  
-
+        # TODO: Translate emails and use html templates (with translations as well, such as {% load i18n %} + {% trans "hello" %}
+        
         if not self.instance:
             return
 
@@ -69,7 +77,7 @@ class PasswordChangeSerializer(serializers.Serializer):
         
         #validate old password
         if not auth.check_user_password(user,data['old_password']):
-            raise serializers.ValidationError({'old_password':"Old password is invalid"})
+            raise serializers.ValidationError({'old_password': MESSAGES['invalid_old_password']})
 
         #Validate password
         try:
@@ -78,7 +86,7 @@ class PasswordChangeSerializer(serializers.Serializer):
             raise serializers.ValidationError({'new_password':e.messages})
 
         if data['old_password'] == data['new_password']:
-            raise serializers.ValidationError({'new_password':"New password must be different from old password."})
+            raise serializers.ValidationError({'new_password': MESSAGES['password_must_be_different'] })
 
         
         auth.set_user_password(user,data['new_password'])     

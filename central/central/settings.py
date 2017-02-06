@@ -109,13 +109,13 @@ LOGIN_URL = 'administration.controllers.home.index'
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
-TIME_ZONE = "US/Pacific"
+TIME_ZONE = "UTC"
 
 
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
-USE_I18N = False
+USE_I18N = True
 
 # If you set this to False, Django will not format dates, numbers and
 # calendars according to the current locale.
@@ -206,8 +206,8 @@ _middlewares = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'administration.middlewares.exception_handler.ExceptionMiddleware'
-    
+    'administration.middlewares.exception_handler.ExceptionMiddleware',
+    'logic.middlewares.locale_middleware.LocaleMiddleware',
 )
 
 

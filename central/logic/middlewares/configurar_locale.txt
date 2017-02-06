@@ -1,0 +1,22 @@
+# Como compilar/generar archivos de lenguaje.
+# Requerido: GNU gettext (y seteado en path)
+
+#Crear carpeta locale en la raiz del proyecto
+#Setear settings de donde encontrar la carpeta locale correctamente (la carpeta tiene que existir): 
+LOCALE_PATHS = (
+        "./locale/",
+    )
+
+#Desde la carpeta raiz (donde esta manage.py) ejecutar, donde es es el locale que queremos.
+django-admin.py makemessages -l es
+#Agregar a mano las traducciones
+
+#Se puede ejecutar para regenerar todas las traducciones que hayan cambiado
+django-admin.py makemessages -a
+
+#Compilarlas
+django-admin.py compilemessages
+
+
+#Luego en settings.py de django, setear el locale que nos interese en: LANGUAGE_CODE
+#Finalmente, asegurarse que USE_I18N y USE_L10N esten activados

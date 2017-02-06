@@ -14,6 +14,8 @@ import hashlib
 import logging
 import traceback
 import requests
+from django.utils.translation import ugettext_lazy as _
+
 
 SECRET_KEY = settings.SECRET_KEY
 
@@ -35,10 +37,10 @@ PASSWORD_RECOVERY_TOKEN_EXPIRATION = timedelta(minutes=PASSWORD_RECOVERY_TOKEN_E
 AUTH_MESSAGES = {
 
     #General messages
-    'user_locked':'User Locked.',
-    'invalid_credentials':"Invalid credentials.",
-    'invalid_user_token':"Invalid user token.",
-    'invalid_password_recovery_token':"Password recovery token is invalid."
+    'user_locked': _('User Locked.'),
+    'invalid_credentials': _("Invalid credentials."),
+    'invalid_user_token': _("Invalid user token."),
+    'invalid_password_recovery_token': _("Password recovery token is invalid.")
         
 }
 
