@@ -10,8 +10,8 @@ from clients.serializers.user_auth import (AuthenticateCredentialsSerializer, Au
                                           RequestPasswordRecoverySerializer, TokenPasswordChangeSerializer)
 
 from clients.auth import user_auth
-from logic.exceptions import APIException, AuthenticationFailed, PermissionDenied, ExceptionCodes
-from logic.auth import authenticate_user, create_user_JWT, validate_user_JWT, get_user_password_validator_messages
+from core.exceptions import APIException, AuthenticationFailed, PermissionDenied, ExceptionCodes
+from core.auth import authenticate_user, create_user_JWT, validate_user_JWT, get_user_password_validator_messages
 
 #about docstrings yaml: http://django-rest-swagger.readthedocs.org/en/latest/yaml.html#parameters
 

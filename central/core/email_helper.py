@@ -9,11 +9,11 @@ import datetime
 import re
 import time
 from dateutil import parser
-from logic.exceptions import ExceptionCodes, OperationError
+from core.exceptions import ExceptionCodes, OperationError
 from django.core.mail import EmailMultiAlternatives
 from urllib import quote, quote_plus
 from django.core.mail import get_connection
-from logic.thread_pool import ThreadPool
+from core.thread_pool import ThreadPool
 import logging
 import traceback
 from django.utils.translation import ugettext_lazy as _

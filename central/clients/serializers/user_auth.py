@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from clients.models import User
-from logic import auth, email_helper
+from core import auth, email_helper
 from django.core.exceptions import ValidationError as DjangoValidationError
-from logic.exceptions import PermissionDenied
+from core.exceptions import PermissionDenied
 from django.utils.translation import ugettext_lazy as _
 
 

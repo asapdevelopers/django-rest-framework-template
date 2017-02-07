@@ -17,7 +17,7 @@ from jsoneditor.widgets import JSONEditor
 import administration.models as admin_models
 import logs_app.models as log_models
 import clients.models as clients_models
-from logic import auth
+from core import auth
 import json
 import re
 

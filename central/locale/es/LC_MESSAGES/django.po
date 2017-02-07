@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-06 16:34-0300\n"
+"POT-Creation-Date: 2017-02-07 10:33-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,22 +26,22 @@ msgstr "Contraseña anterior es inválida."
 msgid "New password must be different from old password."
 msgstr "La nueva contraseña debe ser diferente de la anterior."
 
-#: .\logic\auth.py:40
+#: .\core\auth.py:40
 msgid "User Locked."
 msgstr "Usiario bloqueado"
 
-#: .\logic\auth.py:41
+#: .\core\auth.py:41
 msgid "Invalid credentials."
 msgstr "Credenciales inválidas"
 
-#: .\logic\auth.py:42
+#: .\core\auth.py:42
 msgid "Invalid user token."
 msgstr "Token inválido"
 
-#: .\logic\auth.py:43
+#: .\core\auth.py:43
 msgid "Password recovery token is invalid."
 msgstr "Token de recuperación de contraseña es inválido."
 
-#: .\logic\email_helper.py:30
+#: .\core\email_helper.py:30
 msgid "Failed to send email."
 msgstr "Error al enviar email."

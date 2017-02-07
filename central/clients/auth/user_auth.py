@@ -4,8 +4,8 @@ from datetime import timedelta
 from django.utils import timezone
 from dateutil import parser, tz
 from django.core.cache import cache
-from logic.exceptions import AuthenticationFailed
-from logic.auth import validate_user_JWT
+from core.exceptions import AuthenticationFailed
+from core.auth import validate_user_JWT
 
 
 

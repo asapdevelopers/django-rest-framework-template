@@ -9,7 +9,7 @@ from rest_framework.settings import api_settings
 from django.db import Error, IntegrityError, DataError
 from django.utils import timezone
 from rest_framework import serializers
-from logic.exceptions import _force_text_recursive, ExceptionCodes, OperationError, APIException, ValidationError, ParseError, AuthenticationFailed, NotAuthenticated, PermissionDenied, NotFound, MethodNotAllowed, NotAcceptable, UnsupportedMediaType, Throttled
+from core.exceptions import _force_text_recursive, ExceptionCodes, OperationError, APIException, ValidationError, ParseError, AuthenticationFailed, NotAuthenticated, PermissionDenied, NotFound, MethodNotAllowed, NotAcceptable, UnsupportedMediaType, Throttled
 import logging
 import traceback
 

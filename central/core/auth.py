@@ -6,7 +6,7 @@ from django.utils import timezone
 from dateutil import parser, tz
 from clients.models import User
 from administration.models import Administrator
-from logic.exceptions import ExceptionCodes, AuthenticationFailed, PermissionDenied, OperationError
+from core.exceptions import ExceptionCodes, AuthenticationFailed, PermissionDenied, OperationError
 from django.contrib.auth.signals import user_login_failed
 from django.contrib.auth.password_validation import validate_password, password_changed, get_default_password_validators, password_validators_help_texts
 from django.core.exceptions import ValidationError as DjangoValidationError

@@ -2,7 +2,7 @@ import logging
 import sys
 import locale
 from django.utils import timezone
-from logic.thread_pool import ThreadPool
+from core.thread_pool import ThreadPool
 
 #Use a thread pool to offload db logs 
 #so we can bypass any existing transaction. Otherwise logs would get rolled back.

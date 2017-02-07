@@ -207,7 +207,7 @@ _middlewares = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'administration.middlewares.exception_handler.ExceptionMiddleware',
-    'logic.middlewares.locale_middleware.LocaleMiddleware',
+    'core.middlewares.locale_middleware.LocaleMiddleware',
 )
 
 
@@ -271,13 +271,13 @@ LOGGING = {
     'handlers': {        
         'console': {
             'level': 'DEBUG',
-            'class': 'logic.loggers.ConsoleLogger',
+            'class': 'core.loggers.ConsoleLogger',
             'formatter': 'verbose',
             
         },
         'centralErrors': {
             'level': 'DEBUG',
-            'class': 'logic.loggers.CentralErrorLogger',
+            'class': 'core.loggers.CentralErrorLogger',
             'formatter': 'onlyMessage',
             
         } 

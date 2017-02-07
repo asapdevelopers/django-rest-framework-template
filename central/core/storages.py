@@ -1,7 +1,7 @@
 import boto3
 from django.conf import settings
 from botocore.exceptions import ClientError, BotoCoreError
-from logic.exceptions import OperationError, ExceptionCodes, NotFound
+from core.exceptions import OperationError, ExceptionCodes, NotFound
 from django.core.files.storage import Storage
 from django.core.files.base import File #Django's File proxy
 import time
