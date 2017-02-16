@@ -59,6 +59,12 @@ class ExceptionMiddleware(object):
                 logger.warn(u"{0}: \n{1}".format(msg, "Not found"),extra={'extra':_get_extra(request)})
                 
                 return HttpResponseNotFound("Not found: " + msg)
+                
+            if isinstance(exception, PermissionDenied):
+                msg = unicode(exception)
+                logger.warn(u"{0}: \n{1}".format(msg, "Not allowed"),extra={'extra':_getExtra(request)})
+                
+                return HttpResponseForbidden("Not allowed: " + msg)
 
             else:
                 logger.error(u"{0} ( {1} ) : \n{2}".format(unicode(exception), unicode(exception.args), ''), extra={'extra':_get_extra(request)})
