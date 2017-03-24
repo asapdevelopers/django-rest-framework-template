@@ -348,7 +348,6 @@ LOGGING = {
 if len(sys.argv) > 1 and sys.argv[1] == 'test':
     logging.disable(logging.CRITICAL)
 
-
 LOCALE_PATHS = (
     "./locale/",
 )
