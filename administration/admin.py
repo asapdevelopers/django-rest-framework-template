@@ -17,8 +17,8 @@ from jsoneditor.widgets import JSONEditor
 from django.contrib.auth.models import Group
 from django.contrib.sites.models import Site
 
-admin.site.site_header = 'Central Administration'
-admin.site.index_title = 'Central Administration'
+admin.site.site_header = 'Administration'
+admin.site.index_title = 'Administration'
 
 # Override all json widgets
 admin.ModelAdmin.formfield_overrides = {

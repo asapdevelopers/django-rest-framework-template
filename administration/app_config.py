@@ -7,7 +7,7 @@ from django.apps import AppConfig
 
 class Config(AppConfig):
     name = 'administration'
-    verbose_name = 'Central Administration'
+    verbose_name = 'Administration'
 
     def ready(self):
 

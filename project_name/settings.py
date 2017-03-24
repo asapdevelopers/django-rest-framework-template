@@ -20,12 +20,10 @@ LOAD_BALANCER = env_load_balancer == "True"
 PRODUCTION = env_production == "True"
 
 if not PRODUCTION:
-
     ALLOWED_HOSTS = ['*']
     CORS_ORIGIN_ALLOW_ALL = True
 
 else:
-
     ALLOWED_HOSTS = ['localhost']
     CORS_ORIGIN_ALLOW_ALL = False
     CORS_ORIGIN_WHITELIST = ()
@@ -235,7 +233,6 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-
         'verbose': {
             'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
             'datefmt': "%Y-%m-%d %H:%M:%S"
@@ -351,7 +348,6 @@ LOCALE_PATHS = (
 )
 
 REST_FRAMEWORK = {
-
     'UNICODE_JSON': False,  # This greatly improves json serialization performance in python 2.7.x
 
     # With value of 1 always get the latest IP in the X-Forwarded-For header as that's the one added by the load
@@ -403,18 +399,17 @@ if not DEBUG:
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-            'NAME': os.environ.get("CENTRAL_DB_NAME", ''),
-            'USER': os.environ.get("CENTRAL_DB_USER", ''),
-            'PASSWORD': os.environ.get("CENTRAL_DB_PW", ''),
-            'HOST': os.environ.get("CENTRAL_DB_HOST", ''),
-            'PORT': os.environ.get("CENTRAL_DB_PORT", '5432'),
+            'NAME': os.environ.get("DB_NAME", ''),
+            'USER': os.environ.get("DB_USER", ''),
+            'PASSWORD': os.environ.get("DB_PW", ''),
+            'HOST': os.environ.get("DB_HOST", ''),
+            'PORT': os.environ.get("DB_PORT", '5432'),
             'CONN_MAX_AGE': 60 * 2
         }
     }
 
 else:
     DATABASES = {
-
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
             'NAME': path.join(PROJECT_ROOT, 'db.sqlite3'),  # Or path to database file if using sqlite3.
