@@ -1,6 +1,6 @@
-django==1.10.4
+django==1.10.6
 psycopg2
-djangorestframework==3.4.7
+djangorestframework==3.6.2
 django-rest-swagger==0.3.8
 drf-extensions==0.2.8
 PyJWT==1.4.2
@@ -13,3 +13,4 @@ Pillow
 bitarray
 pdfrw==0.3
 reportlab==2.7
+flake8
