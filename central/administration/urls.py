@@ -5,12 +5,7 @@ from administration.controllers import home
 
 admin.autodiscover()
 
-
-urlpatterns = [ 
-    
-                url(r'^home/', home.index, name='home/index'),     
-                                
-                url(r'^', include(admin.site.urls))  #Automatic admin pages                    
-                
-                                              
-             ]
+urlpatterns = [
+    url(r'^home/', home.index, name='home/index'),
+    url(r'^', include(admin.site.urls))  # Automatic admin pages
+]

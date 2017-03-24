@@ -6,70 +6,69 @@ from rest_framework.reverse import reverse
 from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
 from rest_framework.settings import api_settings
 from rest_framework.throttling import SimpleRateThrottle
-from clients.serializers.user_auth import (AuthenticateCredentialsSerializer, AuthenticateTokenSerializer, PasswordChangeSerializer, 
-                                          RequestPasswordRecoverySerializer, TokenPasswordChangeSerializer)
+from clients.serializers.user_auth import (AuthenticateCredentialsSerializer, AuthenticateTokenSerializer,
+                                           PasswordChangeSerializer,
+                                           RequestPasswordRecoverySerializer, TokenPasswordChangeSerializer)
 
 from clients.auth import user_auth
 from core.exceptions import APIException, AuthenticationFailed, PermissionDenied, ExceptionCodes
-from core.auth import authenticate_user, create_user_JWT, validate_user_JWT, get_user_password_validator_messages
+from core.auth import authenticate_user, create_user_jwt, validate_user_jwt, get_user_password_validator_messages
 
-#about docstrings yaml: http://django-rest-swagger.readthedocs.org/en/latest/yaml.html#parameters
 
-#Throttle for non authenticated users, restrictive
+# about docstrings yaml: http://django-rest-swagger.readthedocs.org/en/latest/yaml.html#parameters
+
+# Throttle for non authenticated users, restrictive
 class NonAuthThrottle(SimpleRateThrottle):
     rate = '5/min'
     scope = 'nonauth'
 
     def get_cache_key(self, request, view):
-        
         return self.cache_format % {
             'scope': self.scope,
             'ident': self.get_ident(request)
         }
 
-    #Do not inform throttling time on auth
+    # Do not inform throttling time on auth
     def wait(self):
         return None
 
-#Less restrictive auth throttle
+
+# Less restrictive auth throttle
 class AuthThrottle(SimpleRateThrottle):
     rate = '10/min'
     scope = 'auth'
 
     def get_cache_key(self, request, view):
-        
         return self.cache_format % {
             'scope': self.scope,
             'ident': self.get_ident(request)
         }
 
-    #Do not inform throttling time on auth
+    # Do not inform throttling time on auth
     def wait(self):
         return None
 
+
 class UserAuth(viewsets.ViewSet):
-    '''
+    """
         User Authentication public API.<br/>
         _____________________________________________________________<br/>
-    '''
-  
+    """
+
     def _get_user_data(self, user, token):
-
         return {
-                'id':user.pk,     
-                'email':user.email,
-                'first_name':user.first_name,
-                'last_name':user.last_name,
-                'token':token
-            }
-        
+            'id': user.pk,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'token': token
+        }
 
-    @list_route(methods=['post'], throttle_classes = (NonAuthThrottle,))
-    def authenticate(self, request):           #Method name all lower case to be able to work correctly with docs
-        '''
+    @list_route(methods=['post'], throttle_classes=(NonAuthThrottle,))
+    def authenticate(self, request):  # Method name all lower case to be able to work correctly with docs
+        """
             Authenticates user credentials and returns an authentication token and data.
             Inactive users will fail to authenticate.<BR/>
-            
             ---
             request_serializer: AuthenticateCredentialsSerializer
             
@@ -81,10 +80,10 @@ class UserAuth(viewsets.ViewSet):
                 - code: 429
                   message: throttled
             
-        '''      
+        """
         data = AuthenticateCredentialsSerializer(data=request.data)
-        data.is_valid(True) 
-        
+        data.is_valid(True)
+
         user = authenticate_user(
             data.validated_data['email'],
             data.validated_data['password'],
@@ -93,17 +92,15 @@ class UserAuth(viewsets.ViewSet):
             PermissionDenied
         )
 
-        token = create_user_JWT(user)
-                
+        token = create_user_jwt(user)
+
         return Response(self._get_user_data(user, token))
 
-
     @list_route(methods=['post'])
-    def authenticatetoken(self, request):           #Method name all lower case to be able to work correctly with docs
-        '''
+    def authenticatetoken(self, request):  # Method name all lower case to be able to work correctly with docs
+        """
             Authenticates user token.
             Inactive users will fail to authenticate
-            
             ---
             request_serializer: AuthenticateTokenSerializer
                        
@@ -114,21 +111,20 @@ class UserAuth(viewsets.ViewSet):
                   message: validationError
                 
             
-        '''      
+        """
         data = AuthenticateTokenSerializer(data=request.data)
-        data.is_valid(True)   
-        
-        user, token_data = validate_user_JWT(data.validated_data['token'], True, PermissionDenied)
-                               
-        return Response(self._get_user_data(user, data.validated_data['token']) )
+        data.is_valid(True)
 
+        user, token_data = validate_user_jwt(data.validated_data['token'], True, PermissionDenied)
 
-    #This one requires an already authenticated user.
-    @list_route(methods=['post'], authentication_classes=(user_auth.JWTUserAuthenticator,), permission_classes = (IsAuthenticated,), throttle_classes = (AuthThrottle,))
-    def changepassword(self, request): 
-        '''
+        return Response(self._get_user_data(user, data.validated_data['token']))
+
+    # This one requires an already authenticated user.
+    @list_route(methods=['post'], authentication_classes=(user_auth.JWTUserAuthenticator,),
+                permission_classes=(IsAuthenticated,), throttle_classes=(AuthThrottle,))
+    def changepassword(self, request):
+        """
             Changes current authenticated user password. Returns an updated token to prevent session expiration.
-            
             ---
             request_serializer: PasswordChangeSerializer
             
@@ -139,30 +135,27 @@ class UserAuth(viewsets.ViewSet):
                   message: validationError
                 
             
-        '''      
-        data = PasswordChangeSerializer(data=request.data, context={'user':request.user})
-        data.is_valid(True)   
-               
+        """
+        data = PasswordChangeSerializer(data=request.data, context={'user': request.user})
+        data.is_valid(True)
+
         user = data.save()
-        token = create_user_JWT(user)
-                
+        token = create_user_jwt(user)
+
         return Response(token)
 
-    
     @list_route(methods=['get'])
-    def passwordpolicy(self, request): 
-        '''
+    def passwordpolicy(self, request):
+        """
             Returns a list of password requirements.
-        '''
+        """
 
         return Response(get_user_password_validator_messages())
 
-
-    @list_route(methods=['post'], throttle_classes = (NonAuthThrottle,))
-    def requestpasswordrecovery(self, request): 
-        '''
+    @list_route(methods=['post'], throttle_classes=(NonAuthThrottle,))
+    def requestpasswordrecovery(self, request):
+        """
             Requests a password recovery for the given user email.
-            
             ---
             request_serializer: RequestPasswordRecoverySerializer
             
@@ -171,20 +164,18 @@ class UserAuth(viewsets.ViewSet):
                   message: validationError
                 
             
-        '''      
+        """
         data = RequestPasswordRecoverySerializer(data=request.data)
-        data.is_valid(True)   
-               
+        data.is_valid(True)
+
         data.save()
-                
+
         return Response()
 
-
-    @list_route(methods=['post'], throttle_classes = (AuthThrottle,))
-    def tokenchangepassword(self, request): 
-        '''
+    @list_route(methods=['post'], throttle_classes=(AuthThrottle,))
+    def tokenchangepassword(self, request):
+        """
             Updates a user password given a token and new password
-            
             ---
             request_serializer: TokenPasswordChangeSerializer
             
@@ -195,10 +186,10 @@ class UserAuth(viewsets.ViewSet):
                   message: validationError
                 
             
-        '''      
+        """
         data = TokenPasswordChangeSerializer(data=request.data)
-        data.is_valid(True)   
-               
+        data.is_valid(True)
+
         data.save()
-                
+
         return Response()

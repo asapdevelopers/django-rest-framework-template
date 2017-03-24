@@ -7,7 +7,6 @@ import django.utils.timezone
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -23,7 +22,8 @@ class Migration(migrations.Migration):
                 ('email', models.CharField(max_length=250, unique=True)),
                 ('first_name', models.CharField(blank=True, default=b'', max_length=250)),
                 ('last_name', models.CharField(blank=True, default=b'', max_length=250)),
-                ('last_password_change', models.DateTimeField(blank=True, default=django.utils.timezone.now, null=True)),
+                ('last_password_change', models.DateTimeField(blank=True,
+                                                              default=django.utils.timezone.now, null=True)),
                 ('is_active', models.BooleanField(default=True)),
             ],
             options={

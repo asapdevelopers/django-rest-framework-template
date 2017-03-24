@@ -3,20 +3,19 @@
 '''
 
 from django.apps import AppConfig
- 
 
- 
-class Config(AppConfig): 
+
+class Config(AppConfig):
     name = 'administration'
     verbose_name = 'Central Administration'
-         
-    def ready(self):        
+
+    def ready(self):
 
         if not hasattr(self, 'is_started'):
-            self.is_started = False           
-        
+            self.is_started = False
+
         if not self.is_started:
-            #Code that needs to be ran before app start can be run here.
+            # Code that needs to be ran before app start can be run here.
             pass
-            
+
         self.is_started = True

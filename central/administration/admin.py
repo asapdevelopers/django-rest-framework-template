@@ -1,4 +1,6 @@
-﻿from django.contrib import admin
+﻿import json
+import re
+from django.contrib import admin
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.files.base import File
@@ -18,9 +20,9 @@ import administration.models as admin_models
 import logs_app.models as log_models
 import clients.models as clients_models
 from core import auth
-import json
-import re
-
+# Unregister some
+from django.contrib.auth.models import Group
+from django.contrib.sites.models import Site
 
 admin.site.site_header = 'Central Administration'
 admin.site.index_title = 'Central Administration'
@@ -28,26 +30,26 @@ admin.site.index_title = 'Central Administration'
 # Override all json widgets
 admin.ModelAdmin.formfield_overrides = {
     JSONField: {'widget': JSONEditor},
-
 }
 
 
-#region some custom overriden classes
+# region some custom overriden classes
 
 class NullListFilter(SimpleListFilter):
     def lookups(self, request, model_admin):
         return (
-            ('1', self.null or 'null', ),
-            ('0', self.not_null or 'not null', ),
+            ('1', self.null or 'null',),
+            ('0', self.not_null or 'not null',),
         )
 
     def queryset(self, request, queryset):
         if self.value() in ('0', '1'):
-            kwargs = { '{0}__isnull'.format(self.parameter_name) : self.value() == '1' }
+            kwargs = {'{0}__isnull'.format(self.parameter_name): self.value() == '1'}
             return queryset.filter(**kwargs)
         return queryset
 
-def get_null_list_filter(field, name = None, null_label = None, not_null_label = None):
+
+def get_null_list_filter(field, name=None, null_label=None, not_null_label=None):
     class NullListFieldFilter(NullListFilter):
         parameter_name = field
         title = name or parameter_name
@@ -55,6 +57,7 @@ def get_null_list_filter(field, name = None, null_label = None, not_null_label =
         not_null = not_null_label
 
     return NullListFieldFilter
+
 
 class SingleTextInputFilter(ListFilter):
     """
@@ -84,39 +87,36 @@ class SingleTextInputFilter(ListFilter):
     def expected_parameters(self):
         return [self.parameter_name]
 
-
     def choices(self, cl):
         all_choice = {
             'selected': self.value() is None,
             'query_string': cl.get_query_string({}, [self.parameter_name]),
-            'display':'All',
+            'display': 'All',
         }
-        return ({
-            'get_query': cl.params,
-            'current_value': self.value(),
-            'all_choice': all_choice,
-            'parameter_name': self.parameter_name
-        }, )
+        return ({'get_query': cl.params,
+                 'current_value': self.value(),
+                 'all_choice': all_choice,
+                 'parameter_name': self.parameter_name},)
 
-def get_text_filter(field, name = None):
+
+def get_text_filter(field, name=None):
     class SingleTextInputFieldFilter(SingleTextInputFilter):
         parameter_name = field
         title = name or parameter_name
-        
+
         def queryset(self, request, queryset):
             if self.value():
-                kwargs = { '{0}'.format(self.parameter_name) : self.value()}
+                kwargs = {'{0}'.format(self.parameter_name): self.value()}
                 return queryset.filter(**kwargs)
-                
 
     return SingleTextInputFieldFilter
 
-class CustomForeignKeyRawIdWidget(ForeignKeyRawIdWidget):
 
-    def __init__(self, rel, attrs = None, using = None):
+class CustomForeignKeyRawIdWidget(ForeignKeyRawIdWidget):
+    def __init__(self, rel, attrs=None, using=None):
         return super(CustomForeignKeyRawIdWidget, self).__init__(rel, admin.site, attrs, using)
 
-    #Override label so it also presents a link rather than a single label
+    # Override label so it also presents a link rather than a single label
     def label_for_value(self, value):
         key = self.rel.get_related_field().name
 
@@ -125,18 +125,19 @@ class CustomForeignKeyRawIdWidget(ForeignKeyRawIdWidget):
 
             label, name = instance._meta.app_label, instance._meta.model_name
             return format_html(
-                            u'<a href="{}">{}</a><br/>', 
-                            reverse('admin:%s_%s_change' % (label,name),args=(instance.pk,)),
-                            instance
-                        )             
+                u'<a href="{}">{}</a><br/>',
+                reverse('admin:%s_%s_change' % (label, name), args=(instance.pk,)),
+                instance
+            )
 
         except (ValueError, self.rel.model.DoesNotExist):
             return ''
 
-#endreigon
+
+# endreigon
 
 
-#region administration admin models
+# region administration admin models
 
 class AdministratorChangeForm(forms.ModelForm):
     """
@@ -144,154 +145,150 @@ class AdministratorChangeForm(forms.ModelForm):
     """
 
     class Meta:
-        model = admin_models.Administrator       
+        model = admin_models.Administrator
         fields = '__all__'
 
-    password = forms.CharField(label="Password", 
-                               help_text="This is the hashed password value, you may change it with a real value, or leave it as it is to keep it unchanged.",
+    password = forms.CharField(label="Password",
+                               help_text="This is the hashed password value, you may change it with a real value, "
+                                         "or leave it as it is to keep it unchanged.",
                                required=True,
-                               widget=forms.TextInput(attrs={'class':"vTextField"})
-                               )   
-        
+                               widget=forms.TextInput(attrs={'class': "vTextField"})
+                               )
+
     def __init__(self, *args, **kwargs):
         super(AdministratorChangeForm, self).__init__(*args, **kwargs)
-   
+
     def clean(self):
         cleaned_data = super(AdministratorChangeForm, self).clean()
-        
-        #If password was changed, set the new password with password hasher. Else remain unchanged.        
-        if 'password' in self.changed_data:
-            
-            #We need to set all attributes on the instance so all password validators can work effectively
-            #Skip changed password as old password might be needed.
-            
-            for k,v in cleaned_data.iteritems():
-                if k != 'password':
-                    setattr(self.instance,k,v)
 
-            password = cleaned_data.get('password',None)
+        # If password was changed, set the new password with password hasher. Else remain unchanged.
+        if 'password' in self.changed_data:
+
+            # We need to set all attributes on the instance so all password validators can work effectively
+            # Skip changed password as old password might be needed.
+
+            for k, v in cleaned_data.iteritems():
+                if k != 'password':
+                    setattr(self.instance, k, v)
+
+            password = cleaned_data.get('password', None)
             if password:
                 try:
-                    auth.validate_admin_password(self.instance,password)
+                    auth.validate_admin_password(self.instance, password)
                 except ValidationError as e:
-                    raise ValidationError({'password':e})
+                    raise ValidationError({'password': e})
 
-                auth.set_admin_password(self.instance,password)
+                auth.set_admin_password(self.instance, password)
 
-                #Set hashed password
+                # Set hashed password
                 cleaned_data['password'] = self.instance.password
 
-    def save(self, commit=True):        
+    def save(self, commit=True):
         user = super(AdministratorChangeForm, self).save(commit=False)
-        
-        if commit:            
+
+        if commit:
             user.save()
-            
+
         return user
+
 
 class AdministratorAdmin(admin.ModelAdmin):
     form = AdministratorChangeForm
     list_display = ('email', 'first_name', 'last_name', 'last_login')
     search_fields = ('email',)
-    
+
 
 admin.site.register(admin_models.Administrator, AdministratorAdmin)
 
-#region clients models
+
+# region clients models
 
 class UserChangeForm(forms.ModelForm):
-    
     class Meta:
-        model = clients_models.User       
+        model = clients_models.User
         fields = '__all__'
 
-    password = forms.CharField(label="Password", 
-                               help_text="This is the hashed password value, you may change it with a real value, or leave it as it is to keep it unchanged.",
+    password = forms.CharField(label="Password",
+                               help_text="This is the hashed password value, you may change it with a real value, "
+                                         "or leave it as it is to keep it unchanged.",
                                required=True,
-                               widget=forms.TextInput(attrs={'class':"vTextField"})
+                               widget=forms.TextInput(attrs={'class': "vTextField"})
                                )
 
-    
-        
     def __init__(self, *args, **kwargs):
         super(UserChangeForm, self).__init__(*args, **kwargs)
-   
-   
+
     def clean(self):
         cleaned_data = super(UserChangeForm, self).clean()
-        
-        #If password was changed, set the new password with password hasher. Else remain unchanged.        
+
+        # If password was changed, set the new password with password hasher. Else remain unchanged.
         if 'password' in self.changed_data:
 
-            #We need to set all attributes on the instance so all password validators can work effectively
-            #Skip changed password as old password might be needed.
-            
-            for k,v in cleaned_data.iteritems():
-                if k != 'password':
-                    setattr(self.instance,k,v)
+            # We need to set all attributes on the instance so all password validators can work effectively
+            # Skip changed password as old password might be needed.
 
-            password = cleaned_data.get('password',None)
+            for k, v in cleaned_data.iteritems():
+                if k != 'password':
+                    setattr(self.instance, k, v)
+
+            password = cleaned_data.get('password', None)
             if password:
                 try:
-                    auth.validate_user_password(self.instance,password)
+                    auth.validate_user_password(self.instance, password)
                 except ValidationError as e:
-                    raise ValidationError({'password':e})
+                    raise ValidationError({'password': e})
 
-                auth.set_user_password(self.instance,password)
+                auth.set_user_password(self.instance, password)
 
-                #Set hashed password
+                # Set hashed password
                 cleaned_data['password'] = self.instance.password
 
-
-    def save(self, commit=True):        
+    def save(self, commit=True):
         user = super(UserChangeForm, self).save(commit=False)
-        
-        if commit:            
+
+        if commit:
             user.save()
 
         return user
 
 
-
 class UserAdmin(admin.ModelAdmin):
     form = UserChangeForm
-    list_display = ('id','email', 'last_login')
-   
+    list_display = ('id', 'email', 'last_login')
+
     def impersonation_token(self, instance):
-        if instance.pk: 
-            return auth.create_user_JWT(instance) 
-           
+        if instance.pk:
+            return auth.create_user_jwt(instance)
+
         else:
             return ""
-   
 
     impersonation_token.short_description = "Impersonation Token"
 
     readonly_fields = ('impersonation_token',)
-    search_fields = ('email', )
+    search_fields = ('email',)
+
 
 admin.site.register(clients_models.User, UserAdmin)
 
-#endregion
-#----------------------------------------------------------------
+
+# endregion
+# ----------------------------------------------------------------
 
 class CentralErrorLogAdmin(admin.ModelAdmin):
     model = log_models.CentralErrorLog
-    list_display = ('date','level','log_name','message')    
+    list_display = ('date', 'level', 'log_name', 'message')
 
-    list_filter = ['level','log_name','file_name']
+    list_filter = ['level', 'log_name', 'file_name']
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         formfield = super(CentralErrorLogAdmin, self).formfield_for_dbfield(db_field, **kwargs)
-        if db_field.name in ('message','extra'):
+        if db_field.name in ('message', 'extra'):
             formfield.widget = forms.Textarea(attrs=formfield.widget.attrs)
         return formfield
-    
+
+
 admin.site.register(log_models.CentralErrorLog, CentralErrorLogAdmin)
 
-
-#Unregister some
-from django.contrib.auth.models import Group
-from django.contrib.sites.models import Site
 admin.site.unregister(Group)
 admin.site.unregister(Site)

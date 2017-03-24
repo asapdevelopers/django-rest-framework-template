@@ -10,13 +10,13 @@ from django.utils.encoding import force_text
 from django.utils.functional import Promise
 
 
-
 class JSONEncoder(json.JSONEncoder):
     '''
         Slightly faster version compared to the drf one.
     '''
-    def default(self, obj):        
-        
+
+    def default(self, obj):
+
         if isinstance(obj, (datetime, date, time)):
             return obj.isoformat()
         elif isinstance(obj, timedelta):
@@ -39,8 +39,9 @@ class JSONEncoder(json.JSONEncoder):
             except:
                 pass
         elif hasattr(obj, '__iter__'):
-            return tuple(item for item in obj)        
+            return tuple(item for item in obj)
         return super(JSONEncoder, self).default(obj)
+
 
 class FasterJSONRenderer(JSONRenderer):
     encoder_class = JSONEncoder

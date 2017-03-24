@@ -9,31 +9,29 @@ from django.conf import settings
     start with a low value and it can changed globally after.
 '''
 
-#Use this to globally handle pool sizes.
+# Use this to globally handle pool sizes.
 POOL_SIZE_FACTOR = settings.THREAD_POOL_SIZE_FACTOR
 
-#connection.close_if_unusable_or_obsolete()
+
+# connection.close_if_unusable_or_obsolete()
 
 
 def _apply_wrapper(fun, args):
-
-    #Wrap function with connection checking before and after each call.
+    # Wrap function with connection checking before and after each call.
     try:
         connection.close_if_unusable_or_obsolete()
-                
-        return fun(*args)        
+
+        return fun(*args)
 
     finally:
         connection.close_if_unusable_or_obsolete()
 
 
 class ThreadPool(object):
-
     def __init__(self, workers):
         self.pool = TP(processes=workers * POOL_SIZE_FACTOR)
-    
 
-    def apply_async(self, fun, args = ()):
+    def apply_async(self, fun, args=()):
         '''
             Applies fun with the given args (tuple) and returns an object
             that can be used to get the results back
