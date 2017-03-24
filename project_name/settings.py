@@ -1,6 +1,8 @@
 ﻿# Django settings for central project.
 from os import path
 import os
+import sys
+import logging
 
 PROJECT_ROOT = path.dirname(path.abspath(path.dirname(__file__)))
 
@@ -342,6 +344,10 @@ LOGGING = {
 
     }
 }
+# Disable logging while testing
+if len(sys.argv) > 1 and sys.argv[1] == 'test':
+    logging.disable(logging.CRITICAL)
+
 
 LOCALE_PATHS = (
     "./locale/",
