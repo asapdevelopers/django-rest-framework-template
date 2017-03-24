@@ -14,3 +14,4 @@ bitarray
 pdfrw==0.3
 reportlab==2.7
 flake8
+mock==2.0.0
