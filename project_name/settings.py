@@ -26,12 +26,9 @@ if not PRODUCTION:
 
 else:
 
-    ALLOWED_HOSTS = ['central.wealthsite.net', 'localhost']
+    ALLOWED_HOSTS = ['localhost']
     CORS_ORIGIN_ALLOW_ALL = False
-    CORS_ORIGIN_WHITELIST = (
-        'central.wealthsite.net',
-        'ws3.wealthsite.net'
-    )
+    CORS_ORIGIN_WHITELIST = ()
     SESSION_COOKIE_SECURE = True
 
 CORS_URLS_REGEX = r'^/api/.*$'
@@ -200,10 +197,10 @@ _middlewares = (
 MIDDLEWARE = _middlewares
 
 # Importante, debe apuntar al archivo maestro de urls.
-ROOT_URLCONF = 'central.urls'
+ROOT_URLCONF = 'project_name.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'central.wsgi.application'
+WSGI_APPLICATION = 'project_name.wsgi.application'
 
 # All apps can be installed regardless of deploy. Base urls.py file will handle the rest.
 INSTALLED_APPS = [
