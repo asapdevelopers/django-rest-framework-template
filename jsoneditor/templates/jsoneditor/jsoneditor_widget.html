@@ -1,0 +1,30 @@
+<br/>
+<input type="hidden" id="{{ field_id }}" name="{{ field }}" value="{{value}}"/>
+<div id="jsoneditor_{{ field_id }}" style="width: 100%; height:500px"></div>
+
+<script type="text/javascript">
+    JSONEDITOR_ID = 'jsoneditor_{{ field_id }}';
+    STATIC_URL = '{{ STATIC_URL }}';
+    FIELD_ID = '{{ field_id }}';
+    
+    JSONEDITOR = document.getElementById(JSONEDITOR_ID);
+    FIELD = document.getElementById(FIELD_ID);
+        
+    INITIAL_JSON = JSON.parse(FIELD.value);
+    FIELD.jsonEditor = null;
+
+    function updateHidden() {
+        if(FIELD.jsonEditor){
+            var json = FIELD.jsonEditor.get();
+            FIELD.value = JSON.stringify(json);
+        }
+    }
+        
+
+    FIELD.jsonEditor = new JSONEditor(JSONEDITOR, {
+        'onChange': updateHidden,
+        'modes': ['code', 'text', 'tree'],
+        'sortObjectKeys':true
+    }, INITIAL_JSON);
+
+</script>

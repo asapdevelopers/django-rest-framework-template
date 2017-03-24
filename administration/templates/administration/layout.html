@@ -1,0 +1,25 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>{%block title%}{%endblock%} - Admin</title>
+    {% load staticfiles %}
+
+    <link rel="stylesheet" href="{% static "administration/content/site.css"%}"/>  
+    <link rel="stylesheet" href="{% static "administration/content/bootstrap.min.css"%}"/>  
+
+    
+    <script type="text/javascript" src="{% static "administration/scripts/jquery-1.10.2.min.js"%}"></script>
+    <script type="text/javascript" src="{% static "administration/scripts/bootstrap.min.js"%}"></script>    
+    <script type="text/javascript" src="{% static "administration/scripts/jquery.validate.min.js"%}"></script>
+    <script type="text/javascript" src="{% static "administration/scripts/jquery.validate.unobtrusive.min.js"%}"></script>
+    <script type="text/javascript" src="{% static "administration/scripts/modernizr-2.6.2.js"%}"></script>
+    <script type="text/javascript" src="{% static "administration/scripts/respond.min.js"%}"></script>  
+    
+
+</head>
+<body>
+    {%block content%}{%endblock%}
+</body>
+</html>
