@@ -28,7 +28,9 @@
 ## Site URLs
 
 Admin site: `http://localhost:8080/`
+
 API: `http://localhost:8080/api/`
+
 API docs: `http://localhost:8080/api/docs/`
 
 ## Tests
