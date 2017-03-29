@@ -182,8 +182,8 @@ class NewPdfWriter(PdfWriter):
         try:
             page = self.pagearray[page_num]
         except IndexError:
-            # TODO: Improve error handling ?
-            PdfOutputError("Invalid page number: " % (page_num))
+            # TODO: Improve error handling ?            
+            raise PdfOutputError("Invalid page number: %s" % (pageNum))
 
         parent = parent or self._outline
         if parent is None:
