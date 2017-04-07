@@ -53,12 +53,13 @@ class UserAuth(viewsets.ViewSet):
     """
 
     def _get_user_data(self, user, token):
+        t = token.decode("utf-8") if type(token) == bytes else token
         return {
             'id': user.pk,
             'email': user.email,
             'first_name': user.first_name,
             'last_name': user.last_name,
-            'token': token
+            'token': t
         }
 
     @list_route(methods=['post'], throttle_classes=(NonAuthThrottle,))
@@ -137,7 +138,7 @@ class UserAuth(viewsets.ViewSet):
         data.is_valid(True)
 
         user = data.save()
-        token = create_user_jwt(user)
+        token = create_user_jwt(user).decode("utf-8")
 
         return Response(token)
 

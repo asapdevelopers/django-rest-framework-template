@@ -353,30 +353,29 @@ LOCALE_PATHS = (
 )
 
 REST_FRAMEWORK = {
-    'UNICODE_JSON': False,  # This greatly improves json serialization performance in python 2.7.x
+    #'UNICODE_JSON': False,  # This greatly improves json serialization performance in python 2.7.x
 
     # With value of 1 always get the latest IP in the X-Forwarded-For header as that's the one added by the load
     # balancer. When not behind a load balancer, this value should be 0
     # RIGHT NOW: No load balancer, IT IS CRITICAL TO SET IT TO 1 when using a load balancer.
     'NUM_PROXIES': 0 if not LOAD_BALANCER else 1,
 
-    'DEFAULT_PARSER_CLASSES': (
-        'clients.custom_parsers.LimitedJSONParser',
-        'clients.custom_parsers.LimitedFormParser',
-        'rest_framework.parsers.MultiPartParser',
-    ),
+    #'DEFAULT_PARSER_CLASSES': (
+    #    'clients.custom_parsers.LimitedJSONParser',
+    #    'clients.custom_parsers.LimitedFormParser',
+    #    'rest_framework.parsers.MultiPartParser',
+    #),
+
+
     'DEFAULT_RENDERER_CLASSES': (
         'clients.custom_renderers.FasterJSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',  # browsable api
-
     ),
 
     # No authentication required by default, will be set depending on service
     'DEFAULT_AUTHENTICATION_CLASSES': (
         # 'rest_framework.authentication.BasicAuthentication', #for testing purposes
         # 'clients.auth.token.JWTAuthentication',
-
-
     ),
     'NON_FIELD_ERRORS_KEY': '__all__',
     # Error key to be used for non field validation errors, make it match django's one.
