@@ -353,7 +353,7 @@ LOCALE_PATHS = (
 )
 
 REST_FRAMEWORK = {
-    #'UNICODE_JSON': False,  # This greatly improves json serialization performance in python 2.7.x
+    # 'UNICODE_JSON': False,  # This greatly improves json serialization performance in python 2.7.x
 
     # With value of 1 always get the latest IP in the X-Forwarded-For header as that's the one added by the load
     # balancer. When not behind a load balancer, this value should be 0
@@ -365,7 +365,6 @@ REST_FRAMEWORK = {
         'clients.custom_parsers.LimitedFormParser',
         'rest_framework.parsers.MultiPartParser',
     ),
-
 
     'DEFAULT_RENDERER_CLASSES': (
         'clients.custom_renderers.FasterJSONRenderer',

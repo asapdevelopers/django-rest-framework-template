@@ -2,8 +2,8 @@
 
 ## Requirements
     Python 3.5
+    virtualenvwrapper    
     pip
-    virtualenvwrapper
     
 
 ## Features

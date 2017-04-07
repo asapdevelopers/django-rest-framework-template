@@ -3,6 +3,7 @@ ignore = F401,W293,W291,E704,C901
 exclude =
     .git,
     __pycache__,
-    .ebextensions
+    .ebextensions,
+    python36
 max-complexity = 10
 max-line-length=120

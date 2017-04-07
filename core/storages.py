@@ -1,5 +1,9 @@
+import time
+import shutil
+import mimetypes
+import logging
+
 from future import standard_library
-standard_library.install_aliases()
 from builtins import str
 from builtins import object
 import boto3
@@ -8,9 +12,6 @@ from botocore.exceptions import ClientError, BotoCoreError
 from core.exceptions import OperationError, ExceptionCodes, NotFound
 from django.core.files.storage import Storage
 from django.core.files.base import File  # Django's File proxy
-import time
-import shutil
-import mimetypes
 from urllib.parse import quote
 from tempfile import TemporaryFile
 from uuid import uuid4
@@ -18,9 +19,9 @@ from os.path import splitext, basename
 from functools import partial
 from django.utils.deconstruct import deconstructible
 from django.core.files.utils import FileProxyMixin
-import logging
 from io import BufferedIOBase, BufferedReader, BufferedRandom, BytesIO
 
+standard_library.install_aliases()
 s3logger = logging.getLogger('storages.s3')
 
 S3_KEY = settings.AWS_KEY
