@@ -1,4 +1,5 @@
-﻿from django import forms
+﻿from builtins import object
+from django import forms
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter, ListFilter
 from django.contrib.admin.widgets import ForeignKeyRawIdWidget
@@ -137,7 +138,7 @@ class AdministratorChangeForm(forms.ModelForm):
         Custom code to make abstract base user work with django admin
     """
 
-    class Meta:
+    class Meta(object):
         model = admin_models.Administrator
         fields = '__all__'
 
@@ -160,7 +161,7 @@ class AdministratorChangeForm(forms.ModelForm):
             # We need to set all attributes on the instance so all password validators can work effectively
             # Skip changed password as old password might be needed.
 
-            for k, v in cleaned_data.iteritems():
+            for k, v in cleaned_data.items():
                 if k != 'password':
                     setattr(self.instance, k, v)
 
@@ -197,7 +198,7 @@ admin.site.register(admin_models.Administrator, AdministratorAdmin)
 # region clients models
 
 class UserChangeForm(forms.ModelForm):
-    class Meta:
+    class Meta(object):
         model = clients_models.User
         fields = '__all__'
 
@@ -220,7 +221,7 @@ class UserChangeForm(forms.ModelForm):
             # We need to set all attributes on the instance so all password validators can work effectively
             # Skip changed password as old password might be needed.
 
-            for k, v in cleaned_data.iteritems():
+            for k, v in cleaned_data.items():
                 if k != 'password':
                     setattr(self.instance, k, v)
 

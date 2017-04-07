@@ -1,4 +1,5 @@
-﻿from django.db import models
+﻿from builtins import object
+from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from uuid import uuid4
 from django.core.exceptions import NON_FIELD_ERRORS
@@ -30,7 +31,7 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)  # Field required by django
     objects = UserManager()
 
-    class Meta:
+    class Meta(object):
         verbose_name = "User"
         verbose_name_plural = "Users"
 

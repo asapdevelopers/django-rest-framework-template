@@ -1,3 +1,7 @@
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 import boto3
 from django.conf import settings
 from botocore.exceptions import ClientError, BotoCoreError
@@ -7,7 +11,7 @@ from django.core.files.base import File  # Django's File proxy
 import time
 import shutil
 import mimetypes
-from urllib import quote
+from urllib.parse import quote
 from tempfile import TemporaryFile
 from uuid import uuid4
 from os.path import splitext, basename
@@ -61,14 +65,14 @@ def safe_S3_path(path):
     """
 
     # Make sure we use bytes strings otherwise quote won't know how to translate them
-    encoded = path.encode('utf-8') if isinstance(path, unicode) else path
+    encoded = path.encode('utf-8') if isinstance(path, str) else path
 
     # replace all names between '/' with the escaped one and then join them back
     return "/".join(quote(v) for v in encoded.split('/'))
 
 
 def handle_exception(e, reraise_msg):
-    s3logger.critical(reraise_msg, extra={'extra': unicode(e)})
+    s3logger.critical(reraise_msg, extra={'extra': str(e)})
     raise OperationError(reraise_msg, ExceptionCodes.s3Error)
 
 

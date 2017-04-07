@@ -1,3 +1,4 @@
+from builtins import str
 import uuid
 import jwt
 from django.conf import settings
@@ -172,7 +173,7 @@ admin_auth_logger = logging.getLogger('administration.site.auth')
 # This is basically the admin login
 # Will be removed once custom login is implemented.
 def login_attempt_failure_handler(sender, **kwargs):
-    admin_auth_logger.warn("Failed admin login.", extra={'extra': unicode(kwargs.get('credentials', ''))})
+    admin_auth_logger.warn("Failed admin login.", extra={'extra': str(kwargs.get('credentials', ''))})
 
 
 user_login_failed.connect(login_attempt_failure_handler)

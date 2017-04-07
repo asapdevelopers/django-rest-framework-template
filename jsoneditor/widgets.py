@@ -1,3 +1,4 @@
+from builtins import object
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.conf import settings
@@ -5,7 +6,7 @@ from django import forms
 
 
 class JSONEditor(forms.widgets.Widget):
-    class Media:
+    class Media(object):
         css = {
             'all': ('jsoneditor/jsoneditor.min.css',),
         }

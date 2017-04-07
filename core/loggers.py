@@ -1,4 +1,5 @@
 from __future__ import print_function
+from builtins import str
 import logging
 import sys
 import locale
@@ -22,7 +23,7 @@ def wrapper(f):
     try:
         f()
     except Exception as e:
-        print((u"Error Saving log: " + unicode(e)).encode(default_encoding, "replace"))
+        print((u"Error Saving log: " + str(e)).encode(default_encoding, "replace"))
 
 
 class ConsoleLogger(logging.Handler):
@@ -77,7 +78,7 @@ class CentralErrorLogger(logging.Handler):
                         remote_addr = request.META.get('REMOTE_ADDR')
                         extra = u"[{}] {}\n{}\n{} - {}".format(request.method, request.path, data, xff, remote_addr)
                     except Exception as e:
-                        extra = "Failed to get extra request data: " + unicode(e)
+                        extra = "Failed to get extra request data: " + str(e)
 
             t = cls(
                 level=record.levelname,
@@ -93,4 +94,4 @@ class CentralErrorLogger(logging.Handler):
             pool.apply_async(wrapper, args=(t.save,))
 
         except Exception as er:
-            print((u"Error Logging central: " + unicode(er)).encode(default_encoding, "replace"))
+            print((u"Error Logging central: " + str(er)).encode(default_encoding, "replace"))
