@@ -1,7 +1,7 @@
 # Django Rest Framework Template
 
 ## Requirements
-    Python 3.4.3
+    Python 3.5
     pip
     virtualenvwrapper
     
@@ -18,7 +18,8 @@
 * Several tweaks to improve the performance
 	
 ## Installation
-    mkvirtualenv -p /usr/bin/python3 venv3
+
+    mkvirtualenv -p /usr/bin/python3.5 venv3.5
     workon venv3
     pip install -r requirements.txt
     Modify settings.py and wsgi.py to change various settings, private keys, access keys, and project/app names. Make sure to find and replace all names

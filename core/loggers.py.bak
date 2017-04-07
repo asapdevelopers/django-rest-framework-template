@@ -1,4 +1,3 @@
-from __future__ import print_function
 import logging
 import sys
 import locale
@@ -22,7 +21,7 @@ def wrapper(f):
     try:
         f()
     except Exception as e:
-        print((u"Error Saving log: " + unicode(e)).encode(default_encoding, "replace"))
+        print (u"Error Saving log: " + unicode(e)).encode(default_encoding, "replace")
 
 
 class ConsoleLogger(logging.Handler):
@@ -34,7 +33,7 @@ class ConsoleLogger(logging.Handler):
         logging.Handler.__init__(self)
 
     def emit(self, record):
-        print(self.format(record).encode(default_encoding, "replace"))
+        print self.format(record).encode(default_encoding, "replace")
 
 
 class CentralErrorLogger(logging.Handler):
@@ -93,4 +92,4 @@ class CentralErrorLogger(logging.Handler):
             pool.apply_async(wrapper, args=(t.save,))
 
         except Exception as er:
-            print((u"Error Logging central: " + unicode(er)).encode(default_encoding, "replace"))
+            print (u"Error Logging central: " + unicode(er)).encode(default_encoding, "replace")
