@@ -1,8 +1,10 @@
 # Django Rest Framework Template
 
 ## Requirements
-    Python 2.7
+    Python 3.4.3
     pip
+    virtualenvwrapper
+    
 
 ## Features
 * An API with login, change password and recovery password endpoints
@@ -16,6 +18,8 @@
 * Several tweaks to improve the performance
 	
 ## Installation
+    mkvirtualenv -p /usr/bin/python3 venv3
+    workon venv3
     pip install -r requirements.txt
     Modify settings.py and wsgi.py to change various settings, private keys, access keys, and project/app names. Make sure to find and replace all names
     delete db.sqlite3
