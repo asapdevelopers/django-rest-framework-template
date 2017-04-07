@@ -360,11 +360,11 @@ REST_FRAMEWORK = {
     # RIGHT NOW: No load balancer, IT IS CRITICAL TO SET IT TO 1 when using a load balancer.
     'NUM_PROXIES': 0 if not LOAD_BALANCER else 1,
 
-    #'DEFAULT_PARSER_CLASSES': (
-    #    'clients.custom_parsers.LimitedJSONParser',
-    #    'clients.custom_parsers.LimitedFormParser',
-    #    'rest_framework.parsers.MultiPartParser',
-    #),
+    'DEFAULT_PARSER_CLASSES': (
+        'clients.custom_parsers.LimitedJSONParser',
+        'clients.custom_parsers.LimitedFormParser',
+        'rest_framework.parsers.MultiPartParser',
+    ),
 
 
     'DEFAULT_RENDERER_CLASSES': (
