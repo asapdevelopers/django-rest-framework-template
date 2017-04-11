@@ -67,3 +67,7 @@ target/
 
 # Pychar
 .idea/
+
+# Python 3
+*.bak
+python36/

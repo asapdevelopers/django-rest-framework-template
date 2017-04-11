@@ -17,7 +17,7 @@ class ObjectField(serializers.Field):
 
     def to_internal_value(self, data):
 
-        if isinstance(data, (str, unicode)):
+        if isinstance(data, str):
             try:
                 return json.loads(data)
             except (TypeError, ValueError):

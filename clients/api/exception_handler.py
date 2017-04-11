@@ -83,12 +83,12 @@ def _get_extra(context):
                 data = request.data
 
     except Exception as e:
-        data = u'Failed to get request data: ' + unicode(e)
+        data = u'Failed to get request data: ' + str(e)
 
     # Use a try catch just in case error happened when authenticating user and the framework failed to
     # Set the property
     try:
-        user = unicode(request.user)
+        user = str(request.user)
         user_id = getattr(request.user, 'pk', None)
     except:
         user = "AnonymousUser"

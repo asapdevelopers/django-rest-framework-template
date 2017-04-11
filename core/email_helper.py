@@ -1,26 +1,31 @@
-from django.conf import settings
+import logging
+import traceback
 import imaplib
+import datetime
+import re
+import time
+
+from future import standard_library
+from builtins import str
+from builtins import object
+from django.conf import settings
 from django.utils import timezone
 from email import message_from_string
 from email.header import decode_header
 from email.utils import getaddresses
 from os.path import splitext
-import datetime
-import re
-import time
 from dateutil import parser
 from core.exceptions import ExceptionCodes, OperationError
 from django.core.mail import EmailMultiAlternatives
-from urllib import quote, quote_plus
+from urllib.parse import quote, quote_plus
 from django.core.mail import get_connection
 from core.thread_pool import ThreadPool
-import logging
-import traceback
+
 from django.utils.translation import ugettext_lazy as _
 
+standard_library.install_aliases()
 email_sending_logger = logging.getLogger('email.sending')
-
-EMAIL_REPLACE_REGEX = re.compile(ur'\r|\n')
+EMAIL_REPLACE_REGEX = re.compile('\r|\n')
 POOL = ThreadPool(workers=1)
 
 DEFAULT_FROM_EMAIL = settings.DEFAULT_FROM_EMAIL
@@ -76,7 +81,7 @@ def _send_email(email, silent=True):
     try:
         email.send()
     except Exception as e:
-        email_sending_logger.error("Failed to send email: " + unicode(e), extra={'extra': traceback.format_exc()})
+        email_sending_logger.error("Failed to send email: " + str(e), extra={'extra': traceback.format_exc()})
 
         if not silent:
             raise OperationError(MESSAGES['failed_to_send_email'], ExceptionCodes.emailSendingError)

@@ -1,4 +1,5 @@
-﻿from django.db import models
+﻿from builtins import object
+from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 
 
@@ -43,7 +44,7 @@ class Administrator(AbstractBaseUser):
 
     objects = AdministratorManager()
 
-    class Meta:
+    class Meta(object):
         verbose_name = "Administrator"
         verbose_name_plural = "Administrators"
 

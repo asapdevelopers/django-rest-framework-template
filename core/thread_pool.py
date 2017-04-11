@@ -1,3 +1,4 @@
+from builtins import object
 from multiprocessing.pool import ThreadPool as TP
 from django.db import connection
 from django.conf import settings

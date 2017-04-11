@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import object
 from rest_framework.exceptions import APIException, AuthenticationFailed, PermissionDenied, NotFound, ValidationError, \
     ParseError, NotAuthenticated, MethodNotAllowed, NotAcceptable, Throttled, UnsupportedMediaType
 from django.core.exceptions import ValidationError as dValidationError
@@ -33,7 +35,7 @@ def validate_unique(ele):
         raise ValidationError(detail=e.message_dict)
 
 
-class ExceptionCodes:
+class ExceptionCodes(object):
     validationError = 'validationError'
     authenticationError = 'authenticationError'
     permissionError = 'permissionError'
@@ -81,7 +83,7 @@ class OperationError(APIException):
             self.code = code
 
     def __unicode__(self):
-        return unicode(self.detail)
+        return str(self.detail)
 
 
 def _force_text_recursive(data):
@@ -91,5 +93,5 @@ def _force_text_recursive(data):
     if isinstance(data, (list, tuple)):
         return [_force_text_recursive(item) for item in data]
     elif isinstance(data, dict):
-        return dict([(key, _force_text_recursive(value)) for key, value in data.iteritems()])
+        return dict([(key, _force_text_recursive(value)) for key, value in data.items()])
     return force_text(data, strings_only=False, errors='ignore')

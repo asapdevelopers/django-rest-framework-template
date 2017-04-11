@@ -21,7 +21,7 @@ def _get_extra(request):
     # Use a try catch just in case error happened when authenticating user and the framework failed to
     # Set the property
     try:
-        user = unicode(request.user)
+        user = str(request.user)
     except:
         user = "AnonymousUser"
 
@@ -53,26 +53,26 @@ class ExceptionMiddleware(object):
             # This does not handle not found due to url mismatch, but using it to handle
             # admin page model not found
             if isinstance(exception, Http404):
-                msg = unicode(exception)
+                msg = str(exception)
                 logger.warn(u"{0}: \n{1}".format(msg, "Not found"), extra={'extra': _get_extra(request)})
 
                 return HttpResponseNotFound("Not found: " + msg)
 
             if isinstance(exception, PermissionDenied):
-                msg = unicode(exception)
+                msg = str(exception)
                 logger.warn(u"{0}: \n{1}".format(msg, "Not allowed"), extra={'extra': _get_extra(request)})
 
                 return HttpResponseForbidden("Not allowed: " + msg)
 
             else:
-                logger.error(u"{0} ( {1} ) : \n{2}".format(unicode(exception), unicode(exception.args), ''),
+                logger.error(u"{0} ( {1} ) : \n{2}".format(str(exception), str(exception.args), ''),
                              extra={'extra': _get_extra(request)})
 
                 if not request.is_ajax():
                     # For now return the same.
-                    return HttpResponseBadRequest(unicode(exception))
+                    return HttpResponseBadRequest(str(exception))
                 else:
-                    return HttpResponseBadRequest(unicode(exception))
+                    return HttpResponseBadRequest(str(exception))
 
         # If debug, allow exception to flow so we get debug data.
         else:

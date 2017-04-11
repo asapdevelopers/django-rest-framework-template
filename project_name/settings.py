@@ -353,7 +353,7 @@ LOCALE_PATHS = (
 )
 
 REST_FRAMEWORK = {
-    'UNICODE_JSON': False,  # This greatly improves json serialization performance in python 2.7.x
+    # 'UNICODE_JSON': False,  # This greatly improves json serialization performance in python 2.7.x
 
     # With value of 1 always get the latest IP in the X-Forwarded-For header as that's the one added by the load
     # balancer. When not behind a load balancer, this value should be 0
@@ -365,18 +365,16 @@ REST_FRAMEWORK = {
         'clients.custom_parsers.LimitedFormParser',
         'rest_framework.parsers.MultiPartParser',
     ),
+
     'DEFAULT_RENDERER_CLASSES': (
         'clients.custom_renderers.FasterJSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',  # browsable api
-
     ),
 
     # No authentication required by default, will be set depending on service
     'DEFAULT_AUTHENTICATION_CLASSES': (
         # 'rest_framework.authentication.BasicAuthentication', #for testing purposes
         # 'clients.auth.token.JWTAuthentication',
-
-
     ),
     'NON_FIELD_ERRORS_KEY': '__all__',
     # Error key to be used for non field validation errors, make it match django's one.
@@ -393,10 +391,10 @@ THREAD_POOL_SIZE_FACTOR = int(os.environ.get("THREAD_POOL_SIZE_FACTOR", 1))
 
 # Make this unique, and don't share it with anybody.
 # This secret key is very important and used by django framework in many places.
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", 'n(bd1f1c%e8=_xad02x5qtfn%wgwpi492e$8_erx+d)!tpeoim')
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", '<someKey>')
 
 # Secret key usen for password recovery
-RESET_TOKEN_SECRET_KEY = os.environ.get("RESET_TOKEN_SECRET_KEY", '=6hzo8&4zued@bj11=k4n^&22d^r^l^nko05=z6+@ar5fx5(-q')
+RESET_TOKEN_SECRET_KEY = os.environ.get("RESET_TOKEN_SECRET_KEY", '<someKey>')
 
 # Database settings
 if not DEBUG:

@@ -1,3 +1,4 @@
+from builtins import object
 import struct
 import os
 import time
@@ -221,7 +222,7 @@ class NewPdfWriter(PdfWriter):
             Producer
         """
         # Need to encode values
-        self._info = {k: PdfString.encode(v) for k, v in info.items()}
+        self._info = {k: PdfString.encode(v) for k, v in list(info.items())}
 
     def write(self, fname, trailer=None, user_fmt=user_fmt, disable_gc=True):
 

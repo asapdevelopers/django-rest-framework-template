@@ -1,4 +1,6 @@
-﻿from django.db import models
+﻿from builtins import str
+from builtins import object
+from django.db import models
 from django.contrib.postgres.fields import JSONField
 from django.utils import timezone
 
@@ -20,8 +22,8 @@ class CentralErrorLog(models.Model):
     extra = models.CharField(max_length=10240, blank=True, null=True)
 
     def __unicode__(self):
-        return unicode(self.pk)
+        return str(self.pk)
 
-    class Meta:
+    class Meta(object):
         verbose_name = "Central Error Log"
         verbose_name_plural = "Central Error Logs"
