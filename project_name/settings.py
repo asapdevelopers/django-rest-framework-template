@@ -391,10 +391,10 @@ THREAD_POOL_SIZE_FACTOR = int(os.environ.get("THREAD_POOL_SIZE_FACTOR", 1))
 
 # Make this unique, and don't share it with anybody.
 # This secret key is very important and used by django framework in many places.
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", 'n(bd1f1c%e8=_xad02x5qtfn%wgwpi492e$8_erx+d)!tpeoim')
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", '<someKey>')
 
 # Secret key usen for password recovery
-RESET_TOKEN_SECRET_KEY = os.environ.get("RESET_TOKEN_SECRET_KEY", '=6hzo8&4zued@bj11=k4n^&22d^r^l^nko05=z6+@ar5fx5(-q')
+RESET_TOKEN_SECRET_KEY = os.environ.get("RESET_TOKEN_SECRET_KEY", '<someKey>')
 
 # Database settings
 if not DEBUG:
